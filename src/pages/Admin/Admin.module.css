@@ -1,0 +1,878 @@
+.pageContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.pageHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pageTitle {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 4px;
+}
+
+.pageSubtitle {
+    color: var(--text-secondary);
+    font-size: 14px;
+    margin: 0;
+}
+
+.filtersArea {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 8px;
+}
+
+.searchBox {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    padding: 8px 16px;
+    border-radius: 12px;
+    width: 350px;
+}
+
+.searchIcon {
+    color: var(--text-secondary);
+}
+
+.searchBox input {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    outline: none;
+    width: 100%;
+    font-size: 14px;
+}
+
+/* Table Styles */
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th {
+    text-align: left;
+    padding: 16px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    border-bottom: 1px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.table td {
+    padding: 16px;
+    border-bottom: 1px solid var(--border-color);
+    font-size: 14px;
+}
+
+.userInfo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+
+.avatarSmall {
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--accent-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 14px;
+    font-weight: 700;
+    color: white;
+}
+
+.roleTag {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(0, 122, 255, 0.1);
+    color: var(--accent-primary);
+    padding: 4px 10px;
+    border-radius: 8px;
+    font-size: 12px;
+    font-weight: 600;
+    width: fit-content;
+}
+
+.permsSummary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.permBadge {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    padding: 2px 8px;
+    border-radius: 6px;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.moreBadge {
+    font-size: 12px;
+    color: var(--accent-primary);
+    font-weight: 700;
+    padding: 2px 4px;
+}
+
+.statusActive {
+    color: #4caf50;
+    font-weight: 600;
+}
+
+.statusInactive {
+    color: var(--text-secondary);
+}
+
+.actions {
+    display: flex;
+    gap: 8px;
+}
+
+.iconBtn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    padding: 8px;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.iconBtn:hover {
+    background: rgba(255, 255, 255, 0.1);
+    color: var(--text-primary);
+}
+
+/* Modal Styles */
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.8);
+    backdrop-filter: blur(8px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+}
+
+.modalContent {
+    width: 90%;
+    max-width: 850px;
+    max-height: 90vh;
+    display: flex;
+    flex-direction: column;
+}
+
+.modalHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+}
+
+.closeBtn {
+    background: none;
+    border: none;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.modalBody {
+    padding: 0 24px 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    overflow-y: auto;
+}
+
+.formSection {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 16px;
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+}
+
+.formGroup {
+    margin-bottom: 20px;
+}
+
+.formGroup label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text-secondary);
+    margin-bottom: 8px;
+}
+
+.formRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+.formGroup input,
+.formGroup select {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    padding: 10px 14px;
+    border-radius: 10px;
+    color: var(--text-primary);
+    outline: none;
+}
+
+.permissionsLayout {
+    display: grid;
+    grid-template-columns: 320px 1fr;
+    gap: 24px;
+    height: 450px;
+    min-height: 400px;
+}
+
+.schemaBrowser {
+    background: rgba(0, 0, 0, 0.2);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.browserHeader {
+    padding: 12px;
+    border-bottom: 1px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.browserHeader label {
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    font-weight: 700;
+    display: block;
+    margin-bottom: 8px;
+}
+
+.miniSearch {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    padding: 6px 12px;
+    border-radius: 8px;
+}
+
+.miniSearch input {
+    background: none;
+    border: none;
+    color: var(--text-primary);
+    font-size: 13px;
+    outline: none;
+    width: 100%;
+}
+
+.schemaList {
+    flex: 1;
+    overflow-y: auto;
+    padding: 8px;
+}
+
+.dbGroup {
+    margin-bottom: 4px;
+}
+
+.dbHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 12px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 14px;
+    color: var(--text-primary);
+}
+
+.dbHeader:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.tableList {
+    padding-left: 24px;
+    margin-top: 2px;
+}
+
+.tableItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-size: 13px;
+    color: var(--text-secondary);
+}
+
+.tableItem:hover {
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-primary);
+}
+
+.tableItem.selected {
+    background: rgba(0, 122, 255, 0.1);
+    color: var(--accent-primary);
+}
+
+.selectedPerms {
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    background: rgba(0, 0, 0, 0.1);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+.selectedPerms>label {
+    padding: 12px;
+    font-size: 11px;
+    text-transform: uppercase;
+    color: var(--text-secondary);
+    font-weight: 700;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.permCardsScroll {
+    flex: 1;
+    overflow-y: auto;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.permissionCardMini {
+    background: var(--bg-secondary);
+    border: 1px solid var(--border-color);
+    border-radius: 10px;
+    padding: 12px;
+}
+
+.permInfoMini {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.permName {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    color: var(--accent-primary);
+}
+
+.privsRowMini {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 10px;
+}
+
+.privBtn,
+.privBtnActive {
+    padding: 6px 10px;
+    font-size: 11px;
+    border-radius: 6px;
+    cursor: pointer;
+    border: 1px solid var(--border-color);
+    background: rgba(255, 255, 255, 0.03);
+    color: var(--text-secondary);
+    transition: all 0.2s;
+    font-weight: 600;
+}
+
+.privBtn:hover {
+    background: rgba(255, 255, 255, 0.08);
+    color: var(--text-primary);
+    border-color: var(--accent-primary);
+}
+
+.privBtnActive {
+    background: rgba(0, 122, 255, 0.15);
+    border-color: var(--accent-primary);
+    color: var(--accent-primary);
+    font-weight: 700;
+    box-shadow: 0 0 10px rgba(0, 122, 255, 0.1);
+}
+
+.expiryRowMini {
+    margin-top: 8px;
+    display: flex;
+    gap: 8px;
+}
+
+.expiryRowMini select {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    color: var(--text-secondary);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 12px;
+    outline: none;
+    flex: 1;
+}
+
+.miniDateInput {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-size: 12px;
+    outline: none;
+    flex: 1.5;
+}
+
+.emptySelection {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    color: var(--text-secondary);
+    gap: 12px;
+    text-align: center;
+    padding: 40px;
+}
+
+/* Compact Role Cards */
+.compactRolesGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+    margin-top: 20px;
+}
+
+.compactRoleCard {
+    padding: 12px 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    position: relative;
+    border: 1px solid var(--border-color);
+    transition: transform 0.2s, box-shadow 0.2s;
+    background: var(--card-bg);
+    border-radius: 10px;
+    min-height: 140px;
+}
+
+.compactRoleCard:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.3);
+    border-color: var(--accent-primary);
+}
+
+.roleHeaderCompact {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.roleIconCompact {
+    width: 32px;
+    height: 32px;
+    background: rgba(99, 102, 241, 0.1);
+    color: var(--accent-primary);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.roleInfoCompact h3 {
+    font-size: 0.9rem;
+    margin: 0;
+    color: var(--text-primary);
+    font-weight: 600;
+}
+
+.roleStatsCompact {
+    display: flex;
+    gap: 8px;
+    margin-top: 2px;
+}
+
+.roleStatsCompact span {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 0.7rem;
+    color: var(--text-secondary);
+}
+
+.rolePermsCompact {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px;
+    flex-grow: 1;
+}
+
+.miniPermTag {
+    font-size: 9px;
+    background: rgba(255, 255, 255, 0.05);
+    padding: 1px 5px;
+    border-radius: 3px;
+    color: var(--text-secondary);
+    font-family: 'JetBrains Mono', monospace;
+}
+
+.morePermTag {
+    font-size: 9px;
+    color: var(--accent-primary);
+    font-weight: 600;
+}
+
+.roleActionsCompact {
+    display: flex;
+    justify-content: flex-end;
+    gap: 6px;
+    border-top: 1px solid var(--border-color);
+    padding-top: 10px;
+}
+
+/* Pagination Styles */
+.paginationArea {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    margin-top: 32px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border-color);
+}
+
+.pageBtn {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border-color);
+    color: var(--text-primary);
+    width: 32px;
+    height: 32px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.pageBtn:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.1);
+    border-color: var(--text-secondary);
+}
+
+.pageBtn:disabled {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.pageIndicator {
+    font-size: 0.85rem;
+    color: var(--text-secondary);
+    font-weight: 500;
+}
+
+/* Approvals Page Styles */
+.requestGrid {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.requestCard {
+    background: var(--card-bg);
+    border: 1px solid var(--border-color);
+    border-radius: 16px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.activeCard {
+    border-color: var(--accent-primary);
+    box-shadow: 0 8px 32px rgba(0, 122, 255, 0.15);
+}
+
+.reqMain {
+    padding: 24px;
+    cursor: pointer;
+}
+
+.reqHeader {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+
+.reqIcon {
+    width: 44px;
+    height: 44px;
+    background: rgba(0, 122, 255, 0.1);
+    color: var(--accent-primary);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.reqType {
+    font-size: 11px;
+    font-weight: 800;
+    color: var(--accent-primary);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.requester {
+    font-size: 16px;
+    color: var(--text-primary);
+}
+
+.reqTimestamp {
+    margin-left: auto;
+    font-size: 12px;
+    color: var(--text-secondary);
+}
+
+.reqDesc {
+    color: var(--text-secondary);
+    margin: 0 0 16px;
+    line-height: 1.6;
+}
+
+.reqMeta {
+    display: flex;
+    gap: 12px;
+}
+
+.reqBadge {
+    background: rgba(255, 255, 255, 0.05);
+    padding: 4px 12px;
+    border-radius: 8px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    color: var(--text-secondary);
+}
+
+.reqDetails {
+    padding: 0 24px 24px;
+}
+
+.divider {
+    height: 1px;
+    background: var(--border-color);
+    margin-bottom: 24px;
+}
+
+.partialSection {
+    background: rgba(255, 255, 255, 0.02);
+    border: 1px solid var(--border-color);
+    border-radius: 12px;
+    padding: 20px;
+    margin-bottom: 24px;
+}
+
+.detailsHeader {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 16px;
+}
+
+.permsListDetail {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.permSelectItem {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px;
+    border-radius: 8px;
+    transition: background 0.2s;
+}
+
+.permSelectItem:hover {
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.permDisplay {
+    flex: 1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.permDisplay code {
+    color: var(--accent-primary);
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+}
+
+.permPrivs {
+    font-size: 11px;
+    color: var(--text-secondary);
+    background: rgba(255, 255, 255, 0.05);
+    padding: 2px 8px;
+    border-radius: 4px;
+}
+
+.reqActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.rejectBtn,
+.approveBtn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 24px;
+    border-radius: 10px;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+    border: none;
+}
+
+.rejectBtn {
+    background: rgba(244, 67, 54, 0.1);
+    color: #f44336;
+}
+
+.approveBtn {
+    background: var(--accent-primary);
+    color: white;
+}
+
+.emptyState {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 80px 0;
+    color: var(--text-secondary);
+}
+
+/* Tabs & Settings Area */
+.tabsArea {
+    display: flex;
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 0.5rem;
+}
+
+.tabBtn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    padding: 0.5rem 1rem;
+    font-size: 0.9rem;
+    font-weight: 500;
+    cursor: pointer;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.tabBtn:hover {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.activeTab {
+    color: var(--primary) !important;
+    background: rgba(59, 130, 246, 0.1) !important;
+}
+
+.configPlate {
+    display: flex;
+    align-items: center;
+    gap: 1.25rem;
+    padding: 1.25rem;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.configPlate:hover {
+    border-color: var(--primary);
+    background: rgba(59, 130, 246, 0.05);
+}
+
+.configActive {
+    border-color: var(--primary);
+    background: rgba(59, 130, 246, 0.05);
+}
+
+.configIcon {
+    width: 48px;
+    height: 48px;
+    background: rgba(59, 130, 246, 0.1);
+    color: var(--primary);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.radio {
+    margin-left: auto;
+    width: 20px;
+    height: 20px;
+    border: 2px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.configActive .radio {
+    border-color: var(--primary);
+}
+
+.radioInner {
+    width: 10px;
+    height: 10px;
+    background: var(--primary);
+    border-radius: 50%;
+}

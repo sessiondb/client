@@ -1,0 +1,460 @@
+/* Query.module.css */
+.queryPage {
+    display: flex;
+    height: calc(100vh - 64px);
+    background: var(--bg-main);
+}
+
+.schemaExplorer {
+    width: 250px;
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    transition: width 0.3s ease;
+    overflow: hidden;
+}
+
+.explorerCollapsed {
+    width: 48px;
+}
+
+.explorerHeader {
+    padding: 0 0.5rem;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-weight: 600;
+    font-size: 0.85rem;
+    border-bottom: 1px solid var(--border);
+}
+
+.explorerCollapsed .explorerHeader {
+    justify-content: center;
+    padding: 0;
+}
+
+.headerText {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.panelToggle {
+    background: transparent;
+    color: var(--text-muted);
+    padding: 6px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.panelToggle:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-main);
+}
+
+.explorerCollapsed .headerText {
+    display: none;
+}
+
+.explorerSearch {
+    padding: 6px 10px;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    margin: 12px;
+    border-radius: 6px;
+    transition: all 0.2s;
+}
+
+.explorerSearch:focus-within {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--primary);
+}
+
+.explorerSearch input {
+    background: transparent;
+    border: none;
+    color: var(--text-main);
+    font-size: 0.75rem;
+    outline: none;
+    width: 100%;
+}
+
+.schemaList {
+    flex: 1;
+    overflow-y: auto;
+    padding: 0.5rem;
+}
+
+.schemaItem {
+    margin-bottom: 0.25rem;
+}
+
+.schemaItem summary {
+    list-style: none;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.4rem 0.5rem;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+}
+
+.schemaItem summary:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-main);
+}
+
+.toggleIcon {
+    transition: transform 0.2s;
+}
+
+.schemaItem[open] .toggleIcon {
+    transform: rotate(90deg);
+}
+
+.columnList {
+    list-style: none;
+    padding-left: 2rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.25rem;
+}
+
+.columnList li {
+    padding: 0.25rem 0;
+}
+
+.editorMain {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.tabBar {
+    display: flex;
+    background: var(--bg-sidebar);
+    border-bottom: 1px solid var(--border);
+    padding: 4px 8px 0 8px;
+    overflow-x: auto;
+    gap: 2px;
+}
+
+.tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    font-size: 0.8rem;
+    color: var(--text-muted);
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: all 0.2s;
+}
+
+.tab:hover {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.activeTab {
+    color: var(--primary);
+    border-bottom-color: var(--primary);
+    background: var(--surface);
+    font-weight: 500;
+}
+
+.closeTab {
+    opacity: 0;
+    transition: opacity 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.tab:hover .closeTab {
+    opacity: 1;
+}
+
+.newTabBtn {
+    padding: 0 12px;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+    border-bottom: 2px solid transparent;
+}
+
+.newTabBtn:hover {
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.editorToolbar {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    background: var(--bg-main);
+    padding: 12px 20px;
+    border-bottom: 1px solid var(--border);
+}
+
+.toolBtn {
+    background: transparent;
+    color: var(--text-muted);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.85rem;
+    padding: 0.4rem 0.75rem;
+}
+
+.toolBtn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-main);
+}
+
+.runBtn {
+    background: var(--primary);
+    color: white;
+    font-weight: 600;
+}
+
+.runBtn:hover {
+    background: var(--primary-hover);
+}
+
+.editorContainer {
+    flex: 1;
+    position: relative;
+    background: var(--bg-main);
+    overflow: hidden;
+    min-height: 200px;
+}
+
+.sqlInput {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    border: none;
+    color: #a5d6ff;
+    /* SQL-like color */
+    font-family: 'JetBrains Mono', 'Fira Code', monospace;
+    font-size: 0.9rem;
+    padding: 1rem;
+    outline: none;
+    resize: none;
+    line-height: 1.5;
+}
+
+.autocompleteOverlay {
+    position: absolute;
+    background: var(--bg-sidebar);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.4);
+    z-index: 10;
+    width: 150px;
+}
+
+.suggestion {
+    padding: 0.5rem 1rem;
+    font-size: 0.8rem;
+    cursor: pointer;
+}
+
+.suggestion:hover {
+    background: var(--primary);
+    color: white;
+}
+
+.resultsArea {
+    flex: 1.2;
+    background: var(--bg-main);
+    border-top: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.resultsHeader {
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--text-muted);
+}
+
+.tableWrapper {
+    flex: 1;
+    overflow: auto;
+}
+
+.resultsTable {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.resultsTable th {
+    position: sticky;
+    top: 0;
+    background: var(--surface);
+    padding: 0.75rem 1.25rem;
+    text-align: left;
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    color: var(--text-muted);
+    border-bottom: 1px solid var(--border);
+}
+
+.resultsTable td {
+    padding: 0.75rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    font-size: 0.85rem;
+    color: var(--text-main);
+}
+
+.emptyResults {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    color: var(--text-muted);
+    gap: 1rem;
+}
+
+.emptyIcon {
+    opacity: 0.2;
+}
+
+.scriptLibrary {
+    width: 250px;
+    background: var(--surface);
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    flex-shrink: 0;
+    transition: width 0.3s ease;
+    overflow: hidden;
+}
+
+.libraryCollapsed {
+    width: 48px;
+}
+
+.libraryCollapsed .explorerHeader {
+    justify-content: center;
+    padding: 0;
+}
+
+.libraryCollapsed .headerText {
+    display: none;
+}
+
+.collapsedText {
+    display: none;
+}
+
+.scriptItem {
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.scriptItem:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.scriptName {
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: var(--text-main);
+    display: block;
+    margin-bottom: 4px;
+}
+
+.scriptMeta {
+    font-size: 0.7rem;
+    color: var(--text-muted);
+}
+
+.modalOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(4px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 1000;
+}
+
+.modal {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px;
+    width: 400px;
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5);
+}
+
+.modal h3 {
+    margin: 0 0 16px 0;
+    font-size: 1.1rem;
+}
+
+.modal input {
+    width: 100%;
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 10px 12px;
+    color: var(--text-main);
+    margin-bottom: 20px;
+    outline: none;
+}
+
+.modal input:focus {
+    border-color: var(--primary);
+}
+
+.modalActions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+}
+
+.modalBtn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    cursor: pointer;
+}
+
+.cancelBtn {
+    background: transparent;
+    color: var(--text-muted);
+}
+
+.confirmBtn {
+    background: var(--primary);
+    color: white;
+}
