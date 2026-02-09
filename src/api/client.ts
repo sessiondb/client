@@ -28,9 +28,10 @@ apiClient.interceptors.response.use(
     (response) => response,
     (error) => {
         if (error.response?.status === 401) {
-            // Clear token and redirect to login if needed
-            // We'll handle the redirect in the AuthContext to avoid circular deps
+            // Clear token
             localStorage.removeItem('sdb_token');
+            // Dispatch custom event for logout
+            window.dispatchEvent(new CustomEvent('sdb-logout'));
         }
         return Promise.reject(error);
     }

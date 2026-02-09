@@ -45,7 +45,6 @@ const SQLQueryEditor: React.FC = () => {
 
     // Results State
     const [results, setResults] = useState<any[]>([]);
-    const [columnNames, setColumnNames] = useState<string[]>([]);
     const [queryError, setQueryError] = useState<string | null>(null);
 
     // Local Tabs State for snappy UI
@@ -58,12 +57,22 @@ const SQLQueryEditor: React.FC = () => {
     const pageSizeOptions = [10, 15, 25, 50, 100];
 
     useEffect(() => {
-        if (tabs.length > 0 && localTabs.length === 0) {
-            setLocalTabs(tabs);
-            const activeId = tabs.find((t: any) => t.isActive)?.id || tabs[0]?.id;
-            setLocalActiveTabId(activeId);
+        if (!tabsLoading) {
+            if (tabs.length > 0) {
+                if (localTabs.length === 0) {
+                    setLocalTabs(tabs);
+                    const activeId = tabs.find((t: any) => t.isActive)?.id || tabs[0]?.id;
+                    setLocalActiveTabId(activeId);
+                }
+            } else if (localTabs.length === 0) {
+                // If backend returns empty array, create a default tab
+                const newId = Math.random().toString(36).substr(2, 9);
+                const defaultTab = { id: newId, name: 'Untitled 1', query: '', isActive: true };
+                setLocalTabs([defaultTab]);
+                setLocalActiveTabId(newId);
+            }
         }
-    }, [tabs]);
+    }, [tabs, tabsLoading]);
 
     useEffect(() => {
         // Auto-collapse main Sidebar when entering Query mode
@@ -78,12 +87,20 @@ const SQLQueryEditor: React.FC = () => {
         setResults([]);
         setCurrentPage(1);
 
-        executeQuery(activeTab.query, {
+        // Strip comments before execution
+        const regex = /("(""|[^"])*")|('(''|[^'])*')|(--[^\r\n]*)|(\/\*[\s\S]*?\*\/)/g;
+        const cleanQuery = activeTab.query.replace(regex, (match: string, doubleQuoted: string, singleQuoted: string) => {
+            if (doubleQuoted || singleQuoted) return match;
+            return '';
+        }).trim();
+
+        if (!cleanQuery) return;
+
+        executeQuery(cleanQuery, {
             onSuccess: (data) => {
                 // Handle different response formats
                 if (data.columns && data.rows) {
                     // Backend returns { columns: string[], rows: any[][] }
-                    setColumnNames(data.columns);
                     // Transform array rows to objects with column names as keys
                     const transformedRows = data.rows.map((row: any[]) => {
                         const obj: any = {};
@@ -96,13 +113,9 @@ const SQLQueryEditor: React.FC = () => {
                 } else if (Array.isArray(data)) {
                     // Backend returns array of objects directly
                     setResults(data);
-                    if (data.length > 0) {
-                        setColumnNames(Object.keys(data[0]));
-                    }
                 } else {
                     // Fallback
                     setResults([]);
-                    setColumnNames([]);
                 }
             },
             onError: (err: any) => {
@@ -252,8 +265,7 @@ const SQLQueryEditor: React.FC = () => {
         const regex = /("(""|[^"])*")|('(''|[^'])*')|(--[^\r\n]*)|(\/\*[\s\S]*?\*\/)/g;
 
         const cleanedQuery = currentQuery.replace(regex, (match: string, doubleQuoted: string, singleQuoted: string) => {
-            if (doubleQuoted) return doubleQuoted; // Preserve double quoted strings
-            if (singleQuoted) return singleQuoted; // Preserve single quoted strings
+            if (doubleQuoted || singleQuoted) return match;
             return ''; // Remove comments
         });
 

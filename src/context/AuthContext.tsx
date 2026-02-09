@@ -39,7 +39,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const queryClient = useQueryClient();
     const [token, setToken] = useState<string | null>(localStorage.getItem('sdb_token'));
 
-    // Initialize user from localStorage if available
+    const logout = () => {
+        setToken(null);
+        localStorage.removeItem('sdb_token');
+        localStorage.removeItem('sdb_user');
+        queryClient.setQueryData(['me'], null);
+        queryClient.clear();
+    };
+
+    // Listen for logout event from axios interceptor
+    React.useEffect(() => {
+        const handleLogout = () => {
+            logout();
+        };
+        window.addEventListener('sdb-logout', handleLogout);
+        return () => window.removeEventListener('sdb-logout', handleLogout);
+    }, []);
     const getStoredUser = () => {
         const stored = localStorage.getItem('sdb_user');
         try {
@@ -96,14 +111,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             queryClient.setQueryData(['me'], user);
         }
     });
-
-    const logout = () => {
-        setToken(null);
-        localStorage.removeItem('sdb_token');
-        localStorage.removeItem('sdb_user');
-        queryClient.setQueryData(['me'], null);
-        queryClient.clear();
-    };
 
     const login = async (username: string, password?: string) => {
         try {

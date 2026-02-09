@@ -239,7 +239,7 @@ body {
   background: var(--bg-card);
   border-radius: var(--radius);
   border: 1px solid var(--border);
-  padding: 1.5rem;
+  padding: 2rem;
   box-shadow: var(--shadow);
 }
 
@@ -250,17 +250,36 @@ button {
   border-radius: var(--radius);
   transition: all 0.2s ease;
   font-family: inherit;
+  font-size: 0.9375rem;
+  font-weight: 500;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .btn-primary {
   background: var(--primary);
   color: white;
-  padding: 0.5rem 1rem;
+  padding: 0.625rem 1.5rem;
+  min-width: 120px;
 }
 
 .btn-primary:hover {
   background: var(--primary-hover);
   transform: translateY(-1px);
+}
+
+.btn-secondary {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-main);
+  border: 1px solid var(--border);
+  padding: 0.625rem 1.5rem;
+  min-width: 120px;
+}
+
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--text-muted);
 }
 
 .btn-ghost {
