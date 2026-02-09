@@ -1,15 +1,17 @@
-import React, { useState, useEffect, useMemo } from 'react';
-import { Play, RotateCcw, Save, Search, Table, Database, ChevronRight, X, Plus, FileText, Clock, PanelLeft, PanelRight, AlertTriangle, RefreshCw, Maximize2, Minimize2, ChevronLeft } from 'lucide-react';
 import Editor from '@monaco-editor/react';
-import { AgGridReact } from 'ag-grid-react';
-import { ModuleRegistry, AllCommunityModule } from 'ag-grid-community';
+import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import 'ag-grid-community/styles/ag-grid.css';
-import 'ag-grid-community/styles/ag-theme-alpine.css';
-import styles from './Query.module.css';
+import { AgGridReact } from 'ag-grid-react';
+import React, { useEffect, useMemo, useState } from 'react';
+// import 'ag-grid-community/styles/ag-theme-alpine.css'; // Removed to use legacy theme via prop
+import { AlertTriangle, ChevronLeft, ChevronRight, Clock, Database, FileText, Maximize2, MessageSquareOff, Minimize2, PanelLeft, PanelRight, Play, Plus, RefreshCw, RotateCcw, Save, Search, Table, X } from 'lucide-react';
+import { useInstance } from '../../context/InstanceContext';
 import { useLayout } from '../../context/LayoutContext';
-import { useSavedScripts, useSaveScript, useQueryTabs, useUpdateTabs, useExecuteQuery } from '../../hooks/useQueryData';
+import { useExecuteQuery, useQueryTabs, useSavedScripts, useSaveScript, useUpdateTabs } from '../../hooks/useQueryData';
 import { useSchema } from '../../hooks/useSchema';
-import { useInstance } from '../../context/InstanceContext';;
+
+import styles from './Query.module.css';
+import { createSqlCompletionProvider } from './SqlAutocomplete';
 
 // Register AG Grid modules
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -26,6 +28,13 @@ const SQLQueryEditor: React.FC = () => {
     const { mutate: executeQuery, isPending: isExecuting } = useExecuteQuery(currentInstanceId);
     const { data: schemaData, isLoading: schemaLoading, refetch: refetchSchema, isRefetching: isRefetchingSchema } = useSchema(currentInstanceId);
 
+    // Use a ref to store schema data so the Monaco completion provider can access the latest value
+    // without suffering from stale closures since onMount only runs once.
+    const schemaRef = React.useRef(schemaData);
+
+    useEffect(() => {
+        schemaRef.current = schemaData;
+    }, [schemaData]);
 
     // Internal Sidebars Toggle State - Defaulting to collapsed as requested
     const [explorerCollapsed, setExplorerCollapsed] = useState(true);
@@ -114,7 +123,7 @@ const SQLQueryEditor: React.FC = () => {
 
     const addTab = () => {
         const newId = Math.random().toString(36).substr(2, 9);
-        const newTab = { id: newId, name: `Untitled ${localTabs.length + 1}`, query: '', isActive: true };
+        const newTab = { id: newId, name: `Untitled ${localTabs.length + 1} `, query: '', isActive: true };
         const updatedTabs = localTabs.map((t: any) => ({ ...t, isActive: false })).concat(newTab);
         setLocalTabs(updatedTabs);
         setLocalActiveTabId(newId);
@@ -161,7 +170,7 @@ const SQLQueryEditor: React.FC = () => {
     };
 
     const handleTableClick = (db: string, table: string) => {
-        const selectQuery = `SELECT * FROM ${db}.${table} LIMIT 100;`;
+        const selectQuery = `SELECT * FROM ${db}.${table} LIMIT 100; `;
         if (activeTab) {
             handleQueryChange(selectQuery);
         } else {
@@ -228,8 +237,38 @@ const SQLQueryEditor: React.FC = () => {
         };
     }, [isDragging]);
 
+    const handleRemoveComments = () => {
+        if (!activeTab || !activeTab.query) {
+            console.log('No query to process');
+            return;
+        }
+
+        const currentQuery = activeTab.query;
+        // Regex to match strings (single/double quotes) OR comments
+        // Group 1: Double Quoted String
+        // Group 2: Single Quoted String
+        // Group 3: Line Comment (-- ...)
+        // Group 4: Block Comment (/* ... */)
+        const regex = /("(""|[^"])*")|('(''|[^'])*')|(--[^\r\n]*)|(\/\*[\s\S]*?\*\/)/g;
+
+        const cleanedQuery = currentQuery.replace(regex, (match: string, doubleQuoted: string, singleQuoted: string) => {
+            if (doubleQuoted) return doubleQuoted; // Preserve double quoted strings
+            if (singleQuoted) return singleQuoted; // Preserve single quoted strings
+            return ''; // Remove comments
+        });
+
+        const finalizedQuery = cleanedQuery.trim();
+
+        if (finalizedQuery !== currentQuery) {
+            handleQueryChange(finalizedQuery);
+            console.log('Comments removed');
+        } else {
+            console.log('No comments to remove');
+        }
+    };
+
     return (
-        <div className={`${styles.queryPage} ${isFocusedMode ? styles.focusedMode : ''} ${isDragging ? styles.noSelect : ''}`}>
+        <div className={`${styles.queryPage} ${isFocusedMode ? styles.focusedMode : ''} ${isDragging ? styles.noSelect : ''} `}>
             {isSaveModalOpen && (
                 <div className={styles.modalOverlay}>
                     <div className={styles.modal}>
@@ -246,14 +285,14 @@ const SQLQueryEditor: React.FC = () => {
                             }}
                         />
                         <div className={styles.modalActions}>
-                            <button className={`${styles.modalBtn} ${styles.cancelBtn}`} onClick={() => setIsSaveModalOpen(false)}>Cancel</button>
-                            <button className={`${styles.modalBtn} ${styles.confirmBtn}`} onClick={handleSaveConfirm}>Save Script</button>
+                            <button className={`${styles.modalBtn} ${styles.cancelBtn} `} onClick={() => setIsSaveModalOpen(false)}>Cancel</button>
+                            <button className={`${styles.modalBtn} ${styles.confirmBtn} `} onClick={handleSaveConfirm}>Save Script</button>
                         </div>
                     </div>
                 </div>
             )}
 
-            <aside className={`${styles.schemaExplorer} ${explorerCollapsed ? styles.explorerCollapsed : ''}`}>
+            <aside className={`${styles.schemaExplorer} ${explorerCollapsed ? styles.explorerCollapsed : ''} `}>
                 <div className={styles.explorerHeader}>
                     <div className={styles.headerText}>
                         <Database size={16} />
@@ -328,7 +367,7 @@ const SQLQueryEditor: React.FC = () => {
                             {localTabs.map((tab: any) => (
                                 <div
                                     key={tab.id}
-                                    className={`${styles.tab} ${tab.id === localActiveTabId ? styles.activeTab : ''}`}
+                                    className={`${styles.tab} ${tab.id === localActiveTabId ? styles.activeTab : ''} `}
                                     onClick={() => setActiveTabLocal(tab.id)}
                                 >
                                     <FileText size={14} />
@@ -346,7 +385,7 @@ const SQLQueryEditor: React.FC = () => {
                         </div>
 
                         <div className={styles.editorToolbar}>
-                            <button className={`${styles.toolBtn} ${styles.runBtn}`} onClick={handleExecute} disabled={isExecuting || !activeTab}>
+                            <button className={`${styles.toolBtn} ${styles.runBtn} `} onClick={handleExecute} disabled={isExecuting || !activeTab}>
                                 <Play size={16} fill="currentColor" />
                                 {isExecuting ? 'Running...' : 'Run Query'}
                             </button>
@@ -357,6 +396,10 @@ const SQLQueryEditor: React.FC = () => {
                             <button className={styles.toolBtn} onClick={handleSaveClick} disabled={!activeTab}>
                                 <Save size={16} />
                                 Save
+                            </button>
+                            <button className={styles.toolBtn} onClick={handleRemoveComments} disabled={!activeTab} title="Remove Comments">
+                                <MessageSquareOff size={16} />
+                                No Comments
                             </button>
                             <div style={{ flex: 1 }}></div>
                             <button className={styles.toolBtn} onClick={handleSyncTabs} title="Sync tabs with server">
@@ -389,85 +432,20 @@ const SQLQueryEditor: React.FC = () => {
                                     // Note: In a real app we might want to track the disposable, but for now this is safe
                                     // as the component unmounts cleans up nicely usually.
 
-                                    // Register SQL completion provider
-                                    monaco.languages.registerCompletionItemProvider('sql', {
-                                        provideCompletionItems: (model: any, position: any) => {
-                                            const word = model.getWordUntilPosition(position);
-                                            const range = {
-                                                startLineNumber: position.lineNumber,
-                                                endLineNumber: position.lineNumber,
-                                                startColumn: word.startColumn,
-                                                endColumn: word.endColumn
-                                            };
-
-                                            const suggestions: any[] = [];
-
-                                            // 1. SQL Keywords
-                                            const keywords = [
-                                                'SELECT', 'FROM', 'WHERE', 'GROUP BY', 'ORDER BY', 'LIMIT', 'OFFSET',
-                                                'INSERT', 'INTO', 'VALUES', 'UPDATE', 'SET', 'DELETE', 'CREATE', 'TABLE',
-                                                'DROP', 'ALTER', 'INDEX', 'VIEW', 'JOIN', 'INNER', 'LEFT', 'RIGHT', 'OUTER',
-                                                'ON', 'AS', 'DISTINCT', 'COUNT', 'SUM', 'AVG', 'MIN', 'MAX', 'AND', 'OR',
-                                                'NOT', 'NULL', 'IS', 'IN', 'BETWEEN', 'LIKE', 'HAVING', 'CASE', 'WHEN',
-                                                'THEN', 'ELSE', 'END', 'EXISTS', 'UNION', 'ALL', 'PRIMARY', 'KEY', 'FOREIGN',
-                                                'REFERENCES', 'DEFAULT', 'CONSTRAINT', 'CHECK', 'UNIQUE', 'Show', 'describe'
-                                            ];
-
-                                            keywords.forEach(kw => {
-                                                suggestions.push({
-                                                    label: kw,
-                                                    kind: monaco.languages.CompletionItemKind.Keyword,
-                                                    insertText: kw,
-                                                    range: range
-                                                });
-                                            });
-
-                                            // 2. Schema Tables & Columns
-                                            if (schemaData?.databases) {
-                                                schemaData.databases.forEach((db: any) => {
-                                                    if (db.tables) {
-                                                        db.tables.forEach((table: any) => {
-                                                            // Add Table Name
-                                                            suggestions.push({
-                                                                label: table.name,
-                                                                kind: monaco.languages.CompletionItemKind.Class,
-                                                                detail: `Table in ${db.database}`,
-                                                                insertText: table.name,
-                                                                range: range
-                                                            });
-
-                                                            // Add Columns (prefixed with table name for clarity in list, or just col name)
-                                                            if (table.columns) {
-                                                                table.columns.forEach((col: any) => {
-                                                                    suggestions.push({
-                                                                        label: col.name,
-                                                                        kind: monaco.languages.CompletionItemKind.Field,
-                                                                        detail: `${col.dataType} (${table.name})`,
-                                                                        insertText: col.name,
-                                                                        range: range // Standard column name
-                                                                    });
-                                                                });
-                                                            }
-                                                        });
-                                                    }
-                                                });
-                                            }
-
-                                            return { suggestions: suggestions };
-                                        }
-                                    });
+                                    // Register SQL completion provider using our advanced logic helper
+                                    monaco.languages.registerCompletionItemProvider('sql', createSqlCompletionProvider(monaco, schemaRef));
                                 }}
                             />
                         </div>
 
                         <div
-                            className={`${styles.resizeDivider} ${isDragging ? styles.isDragging : ''}`}
+                            className={`${styles.resizeDivider} ${isDragging ? styles.isDragging : ''} `}
                             onMouseDown={startDragging}
                         >
                             <div className={styles.dividerHandle} />
                         </div>
 
-                        <div className={`${styles.resultsArea} ${isFocusedMode ? styles.focusedResults : ''}`}>
+                        <div className={`${styles.resultsArea} ${isFocusedMode ? styles.focusedResults : ''} `}>
                             <div className={styles.resultsHeader}>
                                 <span>Query Results {results.length > 0 && `(${results.length})`}</span>
                                 <div className={styles.resultsActions}>
@@ -560,7 +538,7 @@ const SQLQueryEditor: React.FC = () => {
                 )}
             </div>
 
-            <aside className={`${styles.scriptLibrary} ${libraryCollapsed ? styles.libraryCollapsed : ''}`}>
+            <aside className={`${styles.scriptLibrary} ${libraryCollapsed ? styles.libraryCollapsed : ''} `}>
                 <div className={styles.explorerHeader}>
                     <button className={styles.panelToggle} onClick={() => setLibraryCollapsed(!libraryCollapsed)} title={libraryCollapsed ? "Expand Scripts" : "Collapse Scripts"}>
                         {libraryCollapsed ? <PanelLeft size={16} /> : <PanelRight size={16} />}
