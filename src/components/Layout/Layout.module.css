@@ -274,8 +274,13 @@
 
 .contentArea {
     flex: 1;
-    padding: 1.5rem;
+    padding: 2.5rem;
     overflow-y: auto;
+    transition: padding 0.3s var(--ease-snappy);
+}
+
+.noPadding {
+    padding: 0;
 }
 
 .footer {

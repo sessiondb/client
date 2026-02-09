@@ -110,7 +110,9 @@ const Sidebar: React.FC = () => {
                     <div className={styles.avatar}>{currentUser?.name?.charAt(0).toUpperCase() || 'U'}</div>
                     <div className={`${styles.userInfo} ${isSidebarCollapsed ? styles.collapsedUserInfo : ''}`}>
                         <span className={styles.userName}>{currentUser.name}</span>
-                        <span className={styles.userRole}>{currentUser.role}</span>
+                        <span className={styles.userRole}>
+                            {typeof currentUser.role === 'string' ? currentUser.role : currentUser.role?.name || ''}
+                        </span>
                     </div>
                     <button onClick={handleLogout} className={styles.logoutBtn} title="Sign Out">
                         <LogOut size={16} />

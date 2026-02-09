@@ -1,6 +1,5 @@
 import React, { useState } from 'react';
-import { UserPlus, Search, Edit2, Shield, Trash2, Key, Eye, Lock } from 'lucide-react';
-import { Role } from '../../hooks/useRoles';
+import { UserPlus, Search, Edit2, Shield, Trash2, Key, Eye } from 'lucide-react';
 
 import { useUsers, useCreateUser, useUpdateUser, useDeleteUser } from '../../hooks/useUsers';
 import { useAuthConfig, useUpdateAuthConfig } from '../../hooks/useAuthConfig';
@@ -110,7 +109,7 @@ const UserManagement: React.FC = () => {
                     {isError && <div className={styles.errorState}>Error loading users: {(error as any)?.message || 'Unknown error'}</div>}
 
                     {!isLoading && !isError && (
-                        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
+                        <div className="card" style={{ overflow: 'hidden' }}>
                             <table className={styles.table}>
                                 <thead>
                                     <tr>
@@ -123,7 +122,7 @@ const UserManagement: React.FC = () => {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {filteredUsers.map(user => (
+                                    {filteredUsers.map((user: User) => (
                                         <tr key={user.id}>
                                             <td>
                                                 <div className={styles.userInfo}>

@@ -76,7 +76,7 @@ const InstanceManagement: React.FC = () => {
                     <p>Error loading instances. Please check your connection.</p>
                 </div>
             ) : (
-                <div className="card" style={{ padding: 0 }}>
+                <div className="card">
                     <table className={styles.table}>
                         <thead>
                             <tr>
