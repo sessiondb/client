@@ -16,7 +16,8 @@ export interface User {
     id: string;
     name: string;
     role: string | Role;
-    db_username: string;
+    db_username?: string;
+    password?: string;
     status: 'active' | 'inactive';
     isSessionBased: boolean;
     lastLogin: string;

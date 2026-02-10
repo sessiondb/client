@@ -1,5 +1,8 @@
 import React, { useState } from 'react';
-import { X, Shield, Search, Database, Table, ChevronDown, ChevronRight } from 'lucide-react';
+import { X, Shield, Search, Database, Table, ChevronDown, ChevronRight, Calendar, RefreshCw } from 'lucide-react';
+import DatePicker from 'react-datepicker';
+import { parseISO } from 'date-fns';
+import "react-datepicker/dist/react-datepicker.css";
 import { User, DBPermission } from '../../context/AuthContext';
 import { useSchema } from '../../hooks/useSchema';
 import { useRoles, Role } from '../../hooks/useRoles';
@@ -23,13 +26,22 @@ const UserModal: React.FC<UserModalProps> = ({ user, onClose, onSave }) => {
     const [name, setName] = useState(user?.name || '');
     const initialRole = typeof user?.role === 'string' ? user?.role : user?.role?.name || 'Developer';
     const [role, setRole] = useState(initialRole);
-    const [dbUsername, setDbUsername] = useState(user?.db_username || '');
+    const [password, setPassword] = useState('');
     const [isSessionBased, setIsSessionBased] = useState(user?.isSessionBased || false);
     const [permissions, setPermissions] = useState<DBPermission[]>(user?.permissions || []);
     const [searchQuery, setSearchQuery] = useState('');
     const [expandedDBs, setExpandedDBs] = useState<string[]>(schema?.databases?.slice(0, 1).map(db => db.database) || []);
 
 
+
+    const generatePassword = () => {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()';
+        let generated = '';
+        for (let i = 0; i < 12; i++) {
+            generated += chars.charAt(Math.floor(Math.random() * chars.length));
+        }
+        setPassword(generated);
+    };
 
     const toggleDB = (db: string) => {
         setExpandedDBs(prev => prev.includes(db) ? prev.filter(d => d !== db) : [...prev, db]);
@@ -90,13 +102,18 @@ const UserModal: React.FC<UserModalProps> = ({ user, onClose, onSave }) => {
     const updatePermissionType = (db: string, table: string, type: DBPermission['type']) => {
         setPermissions(prev => prev.map(p => {
             if (p.database === db && p.table === table) {
-                return { ...p, type, expiry: type === 'expiring' ? p.expiry || new Date().toISOString().slice(0, 16) : p.expiry };
+                // Ensure default expiry is in YYYY-MM-DDTHH:MM:SSZ format
+                const defaultExpiry = new Date().toISOString().split('.')[0] + 'Z';
+                return { ...p, type, expiry: type === 'expiring' ? p.expiry || defaultExpiry : p.expiry };
             }
             return p;
         }));
     };
 
-    const updatePermissionExpiry = (db: string, table: string, expiry: string) => {
+    const updatePermissionExpiry = (db: string, table: string, date: Date | null) => {
+        if (!date) return;
+        // Format to YYYY-MM-DDTHH:MM:SSZ as requested by user
+        const expiry = date.toISOString().split('.')[0] + 'Z';
         setPermissions(prev => prev.map(p => {
             if (p.database === db && p.table === table) {
                 return { ...p, expiry };
@@ -110,7 +127,7 @@ const UserModal: React.FC<UserModalProps> = ({ user, onClose, onSave }) => {
             id: user?.id || Math.random().toString(36).substr(2, 9),
             name,
             role,
-            db_username: dbUsername || `sdb_${name.toLowerCase().replace(/\s+/g, '_')}`,
+            password: !user ? password : undefined,
             status: user?.status || 'active',
             isSessionBased,
             lastLogin: user?.lastLogin || 'Never',
@@ -155,15 +172,6 @@ const UserModal: React.FC<UserModalProps> = ({ user, onClose, onSave }) => {
 
                         <div className={styles.formRow}>
                             <div className={styles.formGroup}>
-                                <label>DB Username</label>
-                                <input
-                                    type="text"
-                                    value={dbUsername}
-                                    onChange={(e) => setDbUsername(e.target.value)}
-                                    placeholder="e.g. sdb_john_doe"
-                                />
-                            </div>
-                            <div className={styles.formGroup}>
                                 <label>Primary Role</label>
                                 <select value={role} onChange={(e) => handleRoleChange(e.target.value)} disabled={rolesLoading}>
                                     {rolesLoading ? (
@@ -180,6 +188,29 @@ const UserModal: React.FC<UserModalProps> = ({ user, onClose, onSave }) => {
                                     )}
                                 </select>
                             </div>
+
+                            {!user && (
+                                <div className={styles.formGroup}>
+                                    <label>Platform Password</label>
+                                    <div className={styles.inputWithAction}>
+                                        <input
+                                            type="text"
+                                            value={password}
+                                            onChange={(e) => setPassword(e.target.value)}
+                                            placeholder="Set a secure password"
+                                        />
+                                        <button
+                                            type="button"
+                                            className={styles.actionBtn}
+                                            onClick={generatePassword}
+                                            title="Auto-generate password"
+                                        >
+                                            <RefreshCw size={16} />
+                                        </button>
+                                    </div>
+                                </div>
+                            )}
+
                             <div className={styles.formGroup} style={{ justifyContent: 'center' }}>
                                 <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
                                     <input type="checkbox" checked={isSessionBased} onChange={(e) => setIsSessionBased(e.target.checked)} />
@@ -269,12 +300,19 @@ const UserModal: React.FC<UserModalProps> = ({ user, onClose, onSave }) => {
                                                 <option value="expiring">Expiring</option>
                                             </select>
                                             {perm.type === 'expiring' && (
-                                                <input
-                                                    type="datetime-local"
-                                                    value={perm.expiry || ''}
-                                                    onChange={(e) => updatePermissionExpiry(perm.database, perm.table, e.target.value)}
-                                                    className={styles.miniDateInput}
-                                                />
+                                                <div className={styles.datePickerContainer}>
+                                                    <DatePicker
+                                                        selected={perm.expiry ? parseISO(perm.expiry) : new Date()}
+                                                        onChange={(date: Date | null) => updatePermissionExpiry(perm.database, perm.table, date)}
+                                                        showTimeSelect
+                                                        timeFormat="HH:mm"
+                                                        timeIntervals={15}
+                                                        dateFormat="MMM d, yyyy h:mm aa"
+                                                        className={styles.miniDateInput}
+                                                        popperPlacement="bottom-end"
+                                                    />
+                                                    <Calendar size={14} className={styles.dateIcon} />
+                                                </div>
                                             )}
                                         </div>
                                     </div>

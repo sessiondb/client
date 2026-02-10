@@ -6,6 +6,7 @@ import { useAuthConfig, useUpdateAuthConfig } from '../../hooks/useAuthConfig';
 import { User } from '../../context/AuthContext';
 import UserModal from './UserModal';
 import UserDetails from './UserDetails';
+import PasswordResetModal from './PasswordResetModal';
 import styles from './Admin.module.css';
 
 const UserManagement: React.FC = () => {
@@ -20,6 +21,7 @@ const UserManagement: React.FC = () => {
     const [search, setSearch] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingUser, setEditingUser] = useState<User | undefined>(undefined);
+    const [resetPasswordUser, setResetPasswordUser] = useState<User | undefined>(undefined);
     const [selectedUserForDetails, setSelectedUserForDetails] = useState<User | undefined>(undefined);
     const [activeTab, setActiveTab] = useState<'users' | 'settings'>('users');
 
@@ -47,9 +49,16 @@ const UserManagement: React.FC = () => {
         if (editingUser) {
             updateUserMutation.mutate({ ...user, id: editingUser.id });
         } else {
+            // New user with password
             createUserMutation.mutate(user);
         }
         setIsModalOpen(false);
+    };
+
+    const handleResetPassword = (userId: string, newPassword: string) => {
+        // Implementation for resetting password
+        updateUserMutation.mutate({ id: userId, password: newPassword } as User);
+        setResetPasswordUser(undefined);
     };
 
     const handleDelete = (id: string, name: string) => {
@@ -170,6 +179,9 @@ const UserManagement: React.FC = () => {
                                                     <button className={styles.iconBtn} onClick={() => handleOpenEdit(user)} title="Edit Privileges">
                                                         <Edit2 size={16} />
                                                     </button>
+                                                    <button className={styles.iconBtn} onClick={() => setResetPasswordUser(user)} title="Reset Password">
+                                                        <Key size={16} />
+                                                    </button>
                                                     <button className={styles.iconBtn} onClick={() => handleDelete(user.id, user.name)} title="Delete User">
                                                         <Trash2 size={16} />
                                                     </button>
@@ -235,6 +247,14 @@ const UserManagement: React.FC = () => {
                     user={editingUser}
                     onClose={() => setIsModalOpen(false)}
                     onSave={handleSaveUser}
+                />
+            )}
+
+            {resetPasswordUser && (
+                <PasswordResetModal
+                    user={resetPasswordUser}
+                    onClose={() => setResetPasswordUser(undefined)}
+                    onReset={handleResetPassword}
                 />
             )}
 
