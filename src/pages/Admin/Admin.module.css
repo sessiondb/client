@@ -267,6 +267,51 @@
     border-color: var(--primary);
 }
 
+.credentialsList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.credentialEntry {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border-subtle);
+    border-radius: 8px;
+    padding: 12px;
+}
+
+.credentialHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 8px;
+}
+
+.credentialHeader strong {
+    color: var(--text-main);
+    font-size: 0.9rem;
+}
+
+.credentialDetails {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.credentialDetails code {
+    background: rgba(0, 0, 0, 0.3);
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-size: 0.85rem;
+    color: var(--primary);
+    font-family: 'Courier New', monospace;
+}
+
+.expiryText {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
 .permissionsLayout {
     display: grid;
     grid-template-columns: 320px 1fr;

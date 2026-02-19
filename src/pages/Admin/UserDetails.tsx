@@ -30,7 +30,11 @@ const UserDetails: React.FC<UserDetailsProps> = ({ user, onClose }) => {
                         <div className={styles.detailAvatar}>{user.name.charAt(0).toUpperCase()}</div>
                         <div className={styles.detailMainInfo}>
                             <h4>{user.name}</h4>
-                            <p>{user.db_username || 'No DB user assigned'}</p>
+                            <p>
+                                {user.dbCredentials && user.dbCredentials.length > 0
+                                    ? `${user.dbCredentials.length} database credential${user.dbCredentials.length > 1 ? 's' : ''}`
+                                    : 'No database credentials assigned'}
+                            </p>
                             <div className={styles.statusRow}>
                                 {user.status === 'active' ? (
                                     <span className={styles.statusActive}><CheckCircle size={14} /> Active</span>
@@ -50,6 +54,36 @@ const UserDetails: React.FC<UserDetailsProps> = ({ user, onClose }) => {
                                 <span>{user.isSessionBased ? 'Session-Based Access' : 'Permanent Identity'}</span>
                             </div>
                         </div>
+
+                        {user.dbCredentials && user.dbCredentials.length > 0 && (
+                            <div className={styles.detailSection}>
+                                <label><Terminal size={14} /> Database Credentials</label>
+                                <div className={styles.credentialsList}>
+                                    {user.dbCredentials.map((cred) => (
+                                        <div key={cred.id} className={styles.credentialEntry}>
+                                            <div className={styles.credentialHeader}>
+                                                <strong>{cred.instance?.name || 'Unknown Instance'}</strong>
+                                                <span className={
+                                                    cred.status === 'active' ? styles.statusActive :
+                                                        cred.status === 'expired' ? styles.statusInactive :
+                                                            styles.statusInactive
+                                                }>
+                                                    {cred.status}
+                                                </span>
+                                            </div>
+                                            <div className={styles.credentialDetails}>
+                                                <code>{cred.dbUsername}</code>
+                                                {cred.expiresAt && (
+                                                    <span className={styles.expiryText}>
+                                                        Expires: {new Date(cred.expiresAt).toLocaleDateString()}
+                                                    </span>
+                                                )}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
 
                         <div className={styles.detailSection}>
                             <label><Terminal size={14} /> Recent Queries (Top 5)</label>

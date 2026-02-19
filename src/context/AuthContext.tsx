@@ -12,16 +12,35 @@ export interface DBPermission {
     expiry?: string;
 }
 
+export interface DBInstance {
+    id: string;
+    name: string;
+    type: 'mysql' | 'postgres';
+    host: string;
+}
+
+export interface DBUserCredential {
+    id: string;
+    userId: string;
+    instanceId: string;
+    dbUsername: string;
+    status: 'active' | 'expired' | 'revoked';
+    expiresAt?: string | null;
+    createdAt: string;
+    updatedAt: string;
+    instance?: DBInstance;
+}
+
 export interface User {
     id: string;
     name: string;
     role: string | Role;
-    db_username?: string;
     password?: string;
     status: 'active' | 'inactive';
     isSessionBased: boolean;
     lastLogin: string;
     permissions: DBPermission[];
+    dbCredentials?: DBUserCredential[];
     savedScripts: any[];
     queryTabs: any[];
 }
@@ -110,6 +129,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             localStorage.setItem('sdb_token', token);
             localStorage.setItem('sdb_user', JSON.stringify(user));
             queryClient.setQueryData(['me'], user);
+            // Invalidate all queries to refetch with new token
+            // This clears any cached 401 errors from token expiry
+            queryClient.invalidateQueries();
         }
     });
 
