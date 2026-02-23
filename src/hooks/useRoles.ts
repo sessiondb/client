@@ -4,6 +4,7 @@ import apiClient from '../api/client';
 export interface Role {
     id: string;
     name: string;
+    dbKey?: string; // the snake_case identifier in the DB
     description?: string;
     isSystemRole?: boolean;
     permissions: any[];

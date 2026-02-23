@@ -26,18 +26,33 @@ const Sidebar: React.FC = () => {
         navigate('/login');
     };
 
-    const menuItems = [
-        { name: 'Query Editor', path: '/query', icon: Terminal },
+    const allMenuItems = [
+        { name: 'Query Editor', path: '/query', icon: Terminal, requiredPrivilege: 'query_editor' },
         {
             name: 'Admin Portal', path: '/admin', isParent: true, children: [
-                { name: 'Users', path: '/admin/users', icon: Users },
-                { name: 'Roles', path: '/admin/roles', icon: ShieldCheck },
-                { name: 'Approvals', path: '/admin/approvals', icon: ClipboardCheck },
-                { name: 'Instances', path: '/admin/instances', icon: DatabaseZap },
+                { name: 'Users', path: '/admin/users', icon: Users, requiredPrivilege: 'admin_users' },
+                { name: 'Roles', path: '/admin/roles', icon: ShieldCheck, requiredPrivilege: 'admin_roles' },
+                { name: 'Approvals', path: '/admin/approvals', icon: ClipboardCheck, requiredPrivilege: 'admin_approvals' },
+                { name: 'Instances', path: '/admin/instances', icon: DatabaseZap, requiredPrivilege: 'admin_instances' },
             ]
         },
-        { name: 'Audit Logs', path: '/logs', icon: History },
+        { name: 'Audit Logs', path: '/logs', icon: History, requiredPrivilege: 'audit_logs' },
     ];
+
+    const privileges = currentUser?.platformPrivileges;
+    const hasPrivilege = (key?: string) => !privileges || !key || privileges.includes(key);
+
+    // Filter menu items based on platform privileges
+    const menuItems = allMenuItems
+        .map(item => {
+            if (item.isParent && item.children) {
+                const filteredChildren = item.children.filter(c => hasPrivilege(c.requiredPrivilege));
+                if (filteredChildren.length === 0) return null;
+                return { ...item, children: filteredChildren };
+            }
+            return hasPrivilege(item.requiredPrivilege) ? item : null;
+        })
+        .filter(Boolean) as typeof allMenuItems;
 
     if (!currentUser) return null;
 

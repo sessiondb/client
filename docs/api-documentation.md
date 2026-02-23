@@ -615,3 +615,176 @@ interface AuditLog {
   ]
 }
 ```
+
+---
+
+## 11. Database User Management
+
+### List DB Users
+**Endpoint**: `GET /db-users`
+
+**Query Params**:
+| Param | Required | Description |
+|---|---|---|
+| `instance_id` | No | Filter by instance. Omit to return users across all instances. |
+
+**Response**: `Array<DBUser>`
+```json
+[
+  {
+    "id": "dbu_1",
+    "username": "sdb_admin",
+    "instanceId": "prod-1",
+    "instanceName": "Production",
+    "role": "db_owner",
+    "status": "active",
+    "created_at": "2024-02-06 10:30",
+    "linkedUserId": "usr_1",
+    "linkedUserName": "admin_mouli"
+  }
+]
+```
+
+### Update DB User Role
+**Endpoint**: `PUT /db-users/:id`
+
+**Request**:
+```json
+{
+  "role": "read_only"
+}
+```
+
+**Response**: Returns the updated `DBUser` object.
+
+### Link Platform User to DB User
+**Endpoint**: `PUT /db-users/:id/link`
+
+**Request**:
+```json
+{
+  "platform_user_id": "usr_1"  // pass null to unlink
+}
+```
+
+**Response**: Returns the updated `DBUser` object with `linkedUserId` / `linkedUserName` populated.
+
+---
+
+## Data Models (Additions)
+
+### DBUser
+```typescript
+interface DBUser {
+    id: string;
+    username: string;
+    instanceId: string;
+    instanceName: string;
+    role: string;
+    privileges?: DBPrivilege[];  // per-object privilege grants
+    status: 'active' | 'inactive' | 'expired' | 'locked';
+    created_at: string;
+    linkedUserId?: string;   // platform user ID linked to this DB account
+    linkedUserName?: string; // display name of the linked platform user
+}
+```
+
+### DBPrivilege
+```typescript
+interface DBPrivilege {
+    object: string;      // table / schema / database name
+    type: string;        // SELECT, INSERT, UPDATE, DELETE, EXECUTE, ALL, etc.
+    grantable: boolean;  // true = WITH GRANT OPTION
+}
+```
+
+---
+
+### Verify DB Credentials
+**Endpoint**: `POST /db-credentials/verify`
+
+**Request**:
+```json
+{
+  "instanceId": "inst_1",
+  "dbUsername": "john_doe",
+  "dbPassword": "s3cret"
+}
+```
+
+**Response** (success):
+```json
+{
+  "success": true,
+  "data": {
+    "credentialId": "cred_123",
+    "dbUsername": "john_doe",
+    "instanceId": "inst_1",
+    "status": "active"
+  }
+}
+```
+
+**Response** (failure):
+```json
+{ "success": false, "error": "Invalid credentials" }
+```
+
+Tests the provided credentials against the target instance. On success, persists the credential link to the user's `dbCredentials`.
+
+---
+
+### Platform Privileges
+
+The `GET /users/me` response should include:
+
+```json
+{
+  "platformPrivileges": ["query_editor", "admin_users", "admin_roles", "admin_approvals", "admin_instances", "audit_logs"]
+}
+```
+
+**Privilege keys**: `query_editor`, `admin_users`, `admin_roles`, `admin_approvals`, `admin_instances`, `audit_logs`
+
+Derived from the user's role or stored as per-user overrides.
+
+---
+
+### Get DB Roles
+**Endpoint**: `GET /db-roles?instanceId=<id>`
+
+Returns actual database roles from the specified instance.
+
+**Response**:
+```json
+[
+  {
+    "id": "dbr_1",
+    "name": "Read Only",
+    "dbKey": "read_only",
+    "instanceId": "inst_1",
+    "instanceName": "Production",
+    "memberCount": 5,
+    "privileges": [
+      { "object": "public.*", "type": "SELECT", "grantable": false }
+    ],
+    "isSystemRole": true,
+    "createdAt": "2025-01-01T00:00:00Z"
+  }
+]
+```
+
+### DBRole Model
+```typescript
+interface DBRole {
+    id: string;
+    name: string;           // Pascal Case display name
+    dbKey: string;          // snake_case DB identifier
+    instanceId: string;
+    instanceName: string;
+    memberCount: number;
+    privileges: DBPrivilege[];
+    isSystemRole: boolean;
+    createdAt: string;
+}
+```

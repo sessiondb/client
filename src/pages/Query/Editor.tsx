@@ -12,6 +12,7 @@ import { useSchema } from '../../hooks/useSchema';
 
 import styles from './Query.module.css';
 import { createSqlCompletionProvider } from './SqlAutocomplete';
+import CredentialGateModal from './CredentialGateModal';
 
 // Register AG Grid modules
 ModuleRegistry.registerModules([AllCommunityModule]);
@@ -20,7 +21,7 @@ ModuleRegistry.registerModules([AllCommunityModule]);
 
 const SQLQueryEditor: React.FC = () => {
     const { setSidebarCollapsed } = useLayout();
-    const { currentInstanceId } = useInstance();
+    const { currentInstanceId, currentInstance } = useInstance();
     const { data: savedScripts = [], isLoading: scriptsLoading } = useSavedScripts();
     const { mutate: saveScript } = useSaveScript();
     const { data: tabs = [], isLoading: tabsLoading } = useQueryTabs();
@@ -46,6 +47,7 @@ const SQLQueryEditor: React.FC = () => {
     // Results State
     const [results, setResults] = useState<any[]>([]);
     const [queryError, setQueryError] = useState<string | null>(null);
+    const [showCredentialModal, setShowCredentialModal] = useState(false);
 
     // Local Tabs State for snappy UI
     const [localTabs, setLocalTabs] = useState<any[]>([]);
@@ -83,6 +85,11 @@ const SQLQueryEditor: React.FC = () => {
 
     const handleExecute = () => {
         if (!activeTab) return;
+        runQuery();
+    };
+
+    const runQuery = () => {
+        if (!activeTab) return;
         setQueryError(null);
         setResults([]);
         setCurrentPage(1);
@@ -119,6 +126,12 @@ const SQLQueryEditor: React.FC = () => {
                 }
             },
             onError: (err: any) => {
+                const errorCode = err?.response?.data?.code || err?.response?.data?.error;
+                // Backend tells us credentials are needed — show the modal
+                if (errorCode === 'credentials_required') {
+                    setShowCredentialModal(true);
+                    return;
+                }
                 console.error("Query failed:", err);
                 setQueryError(err?.response?.data?.error || err?.message || "An unknown error occurred while executing the query.");
             }
@@ -281,6 +294,20 @@ const SQLQueryEditor: React.FC = () => {
 
     return (
         <div className={`${styles.queryPage} ${isFocusedMode ? styles.focusedMode : ''} ${isDragging ? styles.noSelect : ''} `}>
+            {/* Credential gate modal */}
+            {showCredentialModal && currentInstanceId && (
+                <CredentialGateModal
+                    instanceId={currentInstanceId}
+                    instanceName={currentInstance?.name}
+                    onSuccess={() => {
+                        setShowCredentialModal(false);
+                        // Credentials verified — now execute the pending query
+                        setTimeout(() => runQuery(), 100);
+                    }}
+                    onClose={() => setShowCredentialModal(false)}
+                />
+            )}
+
             {isSaveModalOpen && (
                 <div className={styles.modalOverlay}>
                     <div className={styles.modal}>

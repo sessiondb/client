@@ -40,6 +40,7 @@ export interface User {
     isSessionBased: boolean;
     lastLogin: string;
     permissions: DBPermission[];
+    platformPrivileges?: string[];  // e.g. ['query_editor','admin_users','admin_roles','admin_approvals','admin_instances','audit_logs']
     dbCredentials?: DBUserCredential[];
     savedScripts: any[];
     queryTabs: any[];

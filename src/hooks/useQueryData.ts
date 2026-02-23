@@ -77,3 +77,18 @@ export const useExecuteQuery = (instanceId?: string | null) => {
         }
     });
 };
+
+/** Verify DB credentials for an instance and persist the link */
+export const useVerifyCredential = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: async (payload: { instanceId: string; dbUsername: string; dbPassword: string }) => {
+            const res = await apiClient.post('/db-credentials/verify', payload);
+            return res.data.data || res.data;
+        },
+        onSuccess: () => {
+            // Refresh user data so dbCredentials is up-to-date
+            queryClient.invalidateQueries({ queryKey: ['me'] });
+        }
+    });
+};

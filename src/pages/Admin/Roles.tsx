@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
-import { Lock, Edit3, Trash2, Plus, Users, Database, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useRoles, useCreateRole, useUpdateRole, useDeleteRole, Role } from '../../hooks/useRoles';
 import RoleModal from './RoleModal';
+import PlatformRolesTab from './tabs/PlatformRolesTab';
+import DBRolesTab from './tabs/DBRolesTab';
 import styles from './Admin.module.css';
-
-const ROLES_PER_PAGE = 9;
 
 const RoleManagement: React.FC = () => {
     // Hooks
@@ -15,7 +15,7 @@ const RoleManagement: React.FC = () => {
 
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingRole, setEditingRole] = useState<Role | undefined>(undefined);
-    const [currentPage, setCurrentPage] = useState(1);
+    const [activeTab, setActiveTab] = useState<'platform_roles' | 'db_roles'>('platform_roles');
 
     const handleOpenCreate = () => {
         setEditingRole(undefined);
@@ -30,11 +30,6 @@ const RoleManagement: React.FC = () => {
     const handleDelete = (id: string, name: string) => {
         if (confirm(`Delete role "${name}"? This may affect users assigned to it.`)) {
             deleteRoleMutation.mutate(id);
-            // Pagination adjustment logic
-            const newTotalPages = Math.ceil((roles.length - 1) / ROLES_PER_PAGE);
-            if (currentPage > newTotalPages && newTotalPages > 0) {
-                setCurrentPage(newTotalPages);
-            }
         }
     };
 
@@ -47,88 +42,54 @@ const RoleManagement: React.FC = () => {
         setIsModalOpen(false);
     };
 
-    // Pagination Logic
-    const totalPages = Math.ceil(roles.length / ROLES_PER_PAGE);
-    const startIndex = (currentPage - 1) * ROLES_PER_PAGE;
-    const paginatedRoles = roles.slice(startIndex, startIndex + ROLES_PER_PAGE);
-
     return (
         <div className={styles.pageContainer}>
             <div className={styles.pageHeader}>
                 <div>
                     <h1 className={styles.pageTitle}>Role Management</h1>
-                    <p className={styles.pageSubtitle}>Define template roles with baseline database privileges.</p>
+                    <p className={styles.pageSubtitle}>
+                        {activeTab === 'platform_roles'
+                            ? 'Define template roles with baseline database privileges.'
+                            : 'View actual database roles from the connected instance.'}
+                    </p>
                 </div>
-                <button className="btn-primary" onClick={handleOpenCreate} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <Plus size={18} />
-                    Create New Role Template
+                {activeTab === 'platform_roles' && (
+                    <button className="btn-primary" onClick={handleOpenCreate} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <Plus size={18} />
+                        Create New Role Template
+                    </button>
+                )}
+            </div>
+
+            <div className={styles.tabsArea}>
+                <button
+                    className={`${styles.tabBtn} ${activeTab === 'platform_roles' ? styles.activeTab : ''}`}
+                    onClick={() => setActiveTab('platform_roles')}
+                >
+                    Platform Roles
+                </button>
+                <button
+                    className={`${styles.tabBtn} ${activeTab === 'db_roles' ? styles.activeTab : ''}`}
+                    onClick={() => setActiveTab('db_roles')}
+                >
+                    DB Roles
                 </button>
             </div>
 
-            {isLoading && <div className={styles.loadingState}>Loading roles...</div>}
-            {isError && <div className={styles.errorState}>Error loading roles: {(error as any)?.message || 'Unknown error'}</div>}
-
-            {!isLoading && !isError && (
-                <div className={styles.compactRolesGrid}>
-                    {paginatedRoles.map(role => (
-                        <div key={role.id} className={`${styles.compactRoleCard} card`}>
-                            <div className={styles.roleHeaderCompact}>
-                                <div className={styles.roleIconCompact}>
-                                    <Lock size={14} />
-                                </div>
-                                <div className={styles.roleInfoCompact}>
-                                    <h3>{role.name}</h3>
-                                    <div className={styles.roleStatsCompact}>
-                                        <span><Users size={11} /> {role.userCount}</span>
-                                        <span><Database size={11} /> {(role.permissions || []).length}</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className={styles.rolePermsCompact}>
-                                {(role.permissions || []).slice(0, 2).map((p: any, i: number) => (
-                                    <span key={i} className={styles.miniPermTag}>
-                                        {p.database}.{p.table}
-                                    </span>
-                                ))}
-                                {(role.permissions || []).length > 2 && (
-                                    <span className={styles.morePermTag}>+{(role.permissions || []).length - 2} more</span>
-                                )}
-                            </div>
-
-                            <div className={styles.roleActionsCompact}>
-                                <button className={styles.iconBtn} onClick={() => handleOpenEdit(role)} title="Edit Role">
-                                    <Edit3 size={13} />
-                                </button>
-                                <button className={styles.iconBtn} onClick={() => handleDelete(role.id, role.name)} style={{ color: 'var(--danger)' }} title="Delete Role">
-                                    <Trash2 size={13} />
-                                </button>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+            {activeTab === 'platform_roles' && (
+                <PlatformRolesTab
+                    roles={roles}
+                    isLoading={isLoading}
+                    isError={isError}
+                    error={error}
+                    onEdit={handleOpenEdit}
+                    onDelete={handleDelete}
+                    onCreate={handleOpenCreate}
+                />
             )}
 
-            {totalPages > 1 && (
-                <div className={styles.paginationArea}>
-                    <button
-                        className={styles.pageBtn}
-                        disabled={currentPage === 1}
-                        onClick={() => setCurrentPage(prev => prev - 1)}
-                    >
-                        <ChevronLeft size={16} />
-                    </button>
-                    <span className={styles.pageIndicator}>
-                        Page {currentPage} of {totalPages}
-                    </span>
-                    <button
-                        className={styles.pageBtn}
-                        disabled={currentPage === totalPages}
-                        onClick={() => setCurrentPage(prev => prev + 1)}
-                    >
-                        <ChevronRight size={16} />
-                    </button>
-                </div>
+            {activeTab === 'db_roles' && (
+                <DBRolesTab />
             )}
 
             {isModalOpen && (

@@ -12,11 +12,11 @@ interface RoleModalProps {
 }
 
 const RoleModal: React.FC<RoleModalProps> = ({ role, onClose, onSave }) => {
-    const { data: schema = {} } = useSchema();
+    const { data: schema = {} as Record<string, string[]> } = useSchema();
     const [name, setName] = useState(role?.name || '');
     const [permissions, setPermissions] = useState<DBPermission[]>(role?.permissions || []);
     const [searchQuery, setSearchQuery] = useState('');
-    const [expandedDBs, setExpandedDBs] = useState<string[]>(Object.keys(schema).slice(0, 1));
+    const [expandedDBs, setExpandedDBs] = useState<string[]>(Object.keys(schema || {}).slice(0, 1));
 
     const toggleDB = (db: string) => {
         setExpandedDBs(prev => prev.includes(db) ? prev.filter(d => d !== db) : [...prev, db]);
@@ -35,15 +35,15 @@ const RoleModal: React.FC<RoleModalProps> = ({ role, onClose, onSave }) => {
     };
 
     const toggleAllTablesInDB = (db: string) => {
-        const tables = schema[db] || [];
-        const allSelected = tables.every(t => isTableSelected(db, t));
+        const tables = (schema as any)[db] || [];
+        const allSelected = (tables as string[]).every((t: string) => isTableSelected(db, t));
 
         if (allSelected) {
             setPermissions(prev => prev.filter(p => p.database !== db));
         } else {
-            const newPerms = tables
-                .filter(t => !isTableSelected(db, t))
-                .map(t => ({ database: db, table: t, privileges: ['READ'], type: 'permanent' as const }));
+            const newPerms = (tables as string[])
+                .filter((t: string) => !isTableSelected(db, t))
+                .map((t: string) => ({ database: db, table: t, privileges: ['READ'] as ('READ' | 'WRITE' | 'DELETE' | 'EXECUTE')[], type: 'permanent' as const }));
             setPermissions(prev => [...prev, ...newPerms]);
         }
     };
@@ -74,7 +74,7 @@ const RoleModal: React.FC<RoleModalProps> = ({ role, onClose, onSave }) => {
         onSave(newRole);
     };
 
-    const filteredSchema = Object.entries(schema).reduce((acc, [db, tables]) => {
+    const filteredSchema = Object.entries(schema || {}).reduce((acc: Record<string, string[]>, [db, tables]) => {
         const matchedTables = (tables as string[]).filter(t =>
             db.toLowerCase().includes(searchQuery.toLowerCase()) ||
             t.toLowerCase().includes(searchQuery.toLowerCase())
@@ -104,6 +104,21 @@ const RoleModal: React.FC<RoleModalProps> = ({ role, onClose, onSave }) => {
                                 placeholder="e.g. Database Maintainer"
                             />
                         </div>
+                        <div className={styles.formGroup}>
+                            <label>DB Role Key (Generated)</label>
+                            <div className={styles.inputWithAction} style={{ position: 'relative' }}>
+                                <Shield size={16} style={{ position: 'absolute', left: '10px', top: '50%', transform: 'translateY(-50%)', color: 'var(--text-muted)' }} />
+                                <input
+                                    type="text"
+                                    value={role?.dbKey || name.toLowerCase().replace(/\s+/g, '_')}
+                                    disabled
+                                    style={{ paddingLeft: '34px', background: 'var(--bg-secondary)', cursor: 'not-allowed', opacity: 0.7 }}
+                                />
+                            </div>
+                            <p style={{ fontSize: '0.72rem', color: 'var(--text-muted)', marginTop: '4px' }}>
+                                This is the internal identifier used on the database instance.
+                            </p>
+                        </div>
                     </div>
 
                     <div className={styles.permissionsLayout}>
@@ -131,7 +146,7 @@ const RoleModal: React.FC<RoleModalProps> = ({ role, onClose, onSave }) => {
                                                 <span>{db}</span>
                                             </div>
                                             <button className={styles.selectAllBtn} onClick={() => toggleAllTablesInDB(db)}>
-                                                {schema[db].every(t => isTableSelected(db, t)) ? 'Deselect All' : 'Select All'}
+                                                {((schema as any)[db] as string[] || []).every((t: string) => isTableSelected(db, t)) ? 'Deselect All' : 'Select All'}
                                             </button>
                                         </div>
                                         {expandedDBs.includes(db) && (
@@ -168,8 +183,8 @@ const RoleModal: React.FC<RoleModalProps> = ({ role, onClose, onSave }) => {
                                             {['READ', 'WRITE', 'DELETE', 'EXECUTE'].map(p => (
                                                 <button
                                                     key={p}
-                                                    className={perm.privileges.includes(p) ? styles.privBtnActive : styles.privBtn}
-                                                    onClick={() => updatePermissionPrivileges(perm.database, perm.table, p)}
+                                                    className={perm.privileges.includes(p as any) ? styles.privBtnActive : styles.privBtn}
+                                                    onClick={() => updatePermissionPrivileges(perm.database, perm.table, p as any)}
                                                 >
                                                     {p}
                                                 </button>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { UserPlus, Search, Edit2, Shield, Trash2, Key, Eye } from 'lucide-react';
+import { UserPlus, Key, Shield } from 'lucide-react';
 
 import { useUsers, useCreateUser, useUpdateUser, useDeleteUser } from '../../hooks/useUsers';
 import { useAuthConfig, useUpdateAuthConfig } from '../../hooks/useAuthConfig';
@@ -7,6 +7,8 @@ import { User } from '../../context/AuthContext';
 import UserModal from './UserModal';
 import UserDetails from './UserDetails';
 import PasswordResetModal from './PasswordResetModal';
+import PlatformUsersTab from './tabs/PlatformUsersTab';
+import DBUsersTab from './tabs/DBUsersTab';
 import styles from './Admin.module.css';
 
 const UserManagement: React.FC = () => {
@@ -18,18 +20,11 @@ const UserManagement: React.FC = () => {
     const { data: authConfig } = useAuthConfig();
     const updateAuthConfigMutation = useUpdateAuthConfig();
 
-    const [search, setSearch] = useState('');
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [editingUser, setEditingUser] = useState<User | undefined>(undefined);
     const [resetPasswordUser, setResetPasswordUser] = useState<User | undefined>(undefined);
     const [selectedUserForDetails, setSelectedUserForDetails] = useState<User | undefined>(undefined);
-    const [activeTab, setActiveTab] = useState<'users' | 'settings'>('users');
-
-    const filteredUsers = users.filter((u: User) => {
-        const roleName = typeof u.role === 'string' ? u.role : u.role?.name || '';
-        return (u.name || '').toLowerCase().includes(search.toLowerCase()) ||
-            roleName.toLowerCase().includes(search.toLowerCase());
-    });
+    const [activeTab, setActiveTab] = useState<'platform_users' | 'db_users' | 'settings'>('platform_users');
 
     const handleOpenCreate = () => {
         setEditingUser(undefined);
@@ -55,8 +50,12 @@ const UserManagement: React.FC = () => {
         setIsModalOpen(false);
     };
 
-    const handleResetPassword = (userId: string, newPassword: string) => {
-        // Implementation for resetting password
+    const handleResetPassword = (user: User) => {
+        // We set the user to state, rendering the modal
+        setResetPasswordUser(user);
+    };
+
+    const confirmResetPassword = (userId: string, newPassword: string) => {
         updateUserMutation.mutate({ id: userId, password: newPassword } as User);
         setResetPasswordUser(undefined);
     };
@@ -79,18 +78,26 @@ const UserManagement: React.FC = () => {
                     <h1 className={styles.pageTitle}>User Management</h1>
                     <p className={styles.pageSubtitle}>Manage system users, granular DB permissions, and session access.</p>
                 </div>
-                <button className="btn-primary" onClick={handleOpenCreate} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <UserPlus size={18} />
-                    Create New User
-                </button>
+                {activeTab === 'platform_users' && (
+                    <button className="btn-primary" onClick={handleOpenCreate} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <UserPlus size={18} />
+                        Create New User
+                    </button>
+                )}
             </div>
 
             <div className={styles.tabsArea}>
                 <button
-                    className={`${styles.tabBtn} ${activeTab === 'users' ? styles.activeTab : ''}`}
-                    onClick={() => setActiveTab('users')}
+                    className={`${styles.tabBtn} ${activeTab === 'platform_users' ? styles.activeTab : ''}`}
+                    onClick={() => setActiveTab('platform_users')}
                 >
-                    Users
+                    Platform Users
+                </button>
+                <button
+                    className={`${styles.tabBtn} ${activeTab === 'db_users' ? styles.activeTab : ''}`}
+                    onClick={() => setActiveTab('db_users')}
+                >
+                    DB Users
                 </button>
                 <button
                     className={`${styles.tabBtn} ${activeTab === 'settings' ? styles.activeTab : ''}`}
@@ -100,108 +107,31 @@ const UserManagement: React.FC = () => {
                 </button>
             </div>
 
-            {activeTab === 'users' ? (
-                <>
-                    <div className={styles.filtersArea}>
-                        <div className={styles.searchBox}>
-                            <Search size={18} className={styles.searchIcon} />
-                            <input
-                                type="text"
-                                placeholder="Search by name or role..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                            />
-                        </div>
-                    </div>
+            {activeTab === 'platform_users' && (
+                <PlatformUsersTab
+                    users={users}
+                    isLoading={isLoading}
+                    isError={isError}
+                    error={error}
+                    onViewDetails={handleViewDetails}
+                    onEdit={handleOpenEdit}
+                    onResetPassword={handleResetPassword}
+                    onDelete={handleDelete}
+                />
+            )}
 
-                    {isLoading && <div className={styles.loadingState}>Loading users...</div>}
-                    {isError && <div className={styles.errorState}>Error loading users: {(error as any)?.message || 'Unknown error'}</div>}
+            {activeTab === 'db_users' && (
+                <DBUsersTab />
+            )}
 
-                    {!isLoading && !isError && (
-                        <div className="card" style={{ overflow: 'hidden' }}>
-                            <table className={styles.table}>
-                                <thead>
-                                    <tr>
-                                        <th>User</th>
-                                        <th>Role</th>
-                                        <th>Permissions</th>
-                                        <th>Session Based</th>
-                                        <th>Status</th>
-                                        <th style={{ width: '120px' }}>Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {filteredUsers.map((user: User) => (
-                                        <tr key={user.id}>
-                                            <td>
-                                                <div className={styles.userInfo}>
-                                                    <div className={styles.avatarSmall}>{(user.name || '?').charAt(0).toUpperCase()}</div>
-                                                    <span>{user.name || 'Unknown User'}</span>
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div className={styles.roleTag}>
-                                                    <Shield size={14} />
-                                                    {typeof user.role === 'string' ? user.role : user.role?.name || 'No Role'}
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <div className={styles.permsSummary}>
-                                                    {(user.permissions || []).length > 0 ? (
-                                                        (user.permissions || []).slice(0, 2).map((p: any, i: number) => (
-                                                            <span key={i} className={styles.permBadge}>
-                                                                {p.database}.{p.table}
-                                                            </span>
-                                                        ))
-                                                    ) : (
-                                                        <span className={styles.noPerms}>No specific permissions</span>
-                                                    )}
-                                                    {(user.permissions || []).length > 2 && (
-                                                        <span className={styles.morePerms}>+{(user.permissions || []).length - 2}</span>
-                                                    )}
-                                                </div>
-                                            </td>
-                                            <td>
-                                                <span className={user.isSessionBased ? styles.statusActive : styles.statusInactive}>
-                                                    {user.isSessionBased ? 'Yes' : 'No'}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <span className={user.status === 'active' ? styles.statusActive : styles.statusInactive}>
-                                                    {user.status}
-                                                </span>
-                                            </td>
-                                            <td>
-                                                <div className={styles.actions}>
-                                                    <button className={styles.iconBtn} onClick={() => handleViewDetails(user)} title="View Details">
-                                                        <Eye size={16} />
-                                                    </button>
-                                                    <button className={styles.iconBtn} onClick={() => handleOpenEdit(user)} title="Edit Privileges">
-                                                        <Edit2 size={16} />
-                                                    </button>
-                                                    <button className={styles.iconBtn} onClick={() => setResetPasswordUser(user)} title="Reset Password">
-                                                        <Key size={16} />
-                                                    </button>
-                                                    <button className={styles.iconBtn} onClick={() => handleDelete(user.id, user.name)} title="Delete User">
-                                                        <Trash2 size={16} />
-                                                    </button>
-                                                </div>
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                    )}
-                </>
-            ) : (
+            {activeTab === 'settings' && (
                 <div className="card" style={{ maxWidth: '600px' }}>
                     <h3>Security & Authentication</h3>
                     <p className={styles.pageSubtitle}>Select the system-wide login method for all users.</p>
 
                     <div style={{ marginTop: '2rem', display: 'flex', flexDirection: 'column', gap: '1.5rem' }}>
                         <div
-                            className={`${styles.configPlate} ${authConfig.type === 'password' ? styles.configActive : ''}`}
+                            className={`${styles.configPlate} ${authConfig?.type === 'password' ? styles.configActive : ''}`}
                             onClick={() => setAuthConfig({ type: 'password' })}
                         >
                             <div className={styles.configIcon}>
@@ -212,12 +142,12 @@ const UserManagement: React.FC = () => {
                                 <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Users login using their system username and password.</div>
                             </div>
                             <div className={styles.radio}>
-                                {authConfig.type === 'password' && <div className={styles.radioInner} />}
+                                {authConfig?.type === 'password' && <div className={styles.radioInner} />}
                             </div>
                         </div>
 
                         <div
-                            className={`${styles.configPlate} ${authConfig.type === 'sso' ? styles.configActive : ''}`}
+                            className={`${styles.configPlate} ${authConfig?.type === 'sso' ? styles.configActive : ''}`}
                             onClick={() => setAuthConfig({ type: 'sso' })}
                         >
                             <div className={styles.configIcon}>
@@ -228,7 +158,7 @@ const UserManagement: React.FC = () => {
                                 <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)' }}>Force users to authenticate via enterprise provider (GitHub).</div>
                             </div>
                             <div className={styles.radio}>
-                                {authConfig.type === 'sso' && <div className={styles.radioInner} />}
+                                {authConfig?.type === 'sso' && <div className={styles.radioInner} />}
                             </div>
                         </div>
                     </div>
@@ -254,7 +184,7 @@ const UserManagement: React.FC = () => {
                 <PasswordResetModal
                     user={resetPasswordUser}
                     onClose={() => setResetPasswordUser(undefined)}
-                    onReset={handleResetPassword}
+                    onReset={confirmResetPassword}
                 />
             )}
 
