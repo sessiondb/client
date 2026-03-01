@@ -11,18 +11,21 @@ github_community_sync:
     - git config --global user.name "GitLab CI Bot"
     - git config --global user.email "ci-bot@sessiondb.com"
   script:
-    # 1. Create temporary sync branch
+    # 1. Prepare the scrubbed branch
     - git checkout -b github-sync-temp
     
-    # 2. Swap to the Community Gitignore
+    # 2. Apply Community-only rules
     - mv .gitignore.community .gitignore
         
-    # 4. Scrub Pro Frontend (Ref: src/features/Premium)
+    # 3. Scrub Pro Backend logic (Ref: image_da7201.png)
+    - rm -rf internal/premium/
+    
+    # 4. Scrub Pro Frontend logic (Ref: image_b269b4.png)
     - rm -rf src/features/Premium/
-    - git rm -r --cached src/features/Premium/ || true
     
-    # 5. Commit with FIXED syntax (Single quotes around the whole command)
-    - 'git commit -m "chore: sync community edition [skip ci]"'
+    # 5. Record the deletions and .gitignore change
+    - git add .
     
-    # 6. Force Push to GitHub using your CI Variables
+    # 6. Commit and push to GitHub
+    - 'git commit -m "chore: sync community edition [skip ci]" || echo "No changes to sync"'
     - git push --force https://${GH_TOKEN}@github.com/SaimouliBandari/sessiondb-ui.git github-sync-temp:main
