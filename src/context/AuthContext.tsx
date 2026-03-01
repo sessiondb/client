@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Sai Mouli Bandari Licensed under Business Source License 1.1.
 import React, { createContext, useContext, useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import apiClient from '../api/client';
@@ -31,6 +32,13 @@ export interface DBUserCredential {
     instance?: DBInstance;
 }
 
+export interface FeatureFlag {
+    enabled: boolean;
+    reason?: 'plan_upgrade_required' | 'beta_restricted';
+    minimumPlan?: string;
+    isBeta?: boolean;
+}
+
 export interface User {
     id: string;
     name: string;
@@ -39,8 +47,17 @@ export interface User {
     status: 'active' | 'inactive';
     isSessionBased: boolean;
     lastLogin: string;
+    // DB specific permissions
     permissions: DBPermission[];
-    platformPrivileges?: string[];  // e.g. ['query_editor','admin_users','admin_roles','admin_approvals','admin_instances','audit_logs']
+
+    // [NEW] Service-level RBAC Permissions 
+    // e.g., ['users:read', 'users:write', 'roles:manage']
+    rbacPermissions?: string[];
+
+    // [NEW] Platform-level features (usually comes from the tenant/organization level)
+    tenantFeatures?: Record<string, FeatureFlag>;
+
+    platformPrivileges?: string[];  // Legacy, to be removed if fully migrating
     dbCredentials?: DBUserCredential[];
     savedScripts: any[];
     queryTabs: any[];

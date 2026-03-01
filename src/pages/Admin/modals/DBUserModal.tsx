@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Sai Mouli Bandari Licensed under Business Source License 1.1.
 import React, { useState } from 'react';
 import { X, Save, UserCheck, Link as LinkIcon } from 'lucide-react';
 import { DBUser, useLinkPlatformUser } from '../../../hooks/useDBUsers';

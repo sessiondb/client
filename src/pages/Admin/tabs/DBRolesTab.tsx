@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Sai Mouli Bandari Licensed under Business Source License 1.1.
 import React, { useState } from 'react';
 import { Search, Database, Users, ChevronDown, ChevronUp, Key, Lock } from 'lucide-react';
 import { useDBRoles, DBRole } from '../../../hooks/useDBRoles';

@@ -1,0 +1,25 @@
+Business Source License 1.1
+
+License text copyright (c) 2017 MariaDB Corporation Ab, All Rights Reserved.
+"Business Source License" is a trademark of MariaDB Corporation Ab.
+
+Parameters
+Licensor: Sai Mouli Bandari
+Licensed Work: SessionDB Community Edition (all source code in this repository)
+Change Date: January 1, 2030
+Change License: Apache License, Version 2.0
+
+Additional Use Grant: 
+You may make use of the Licensed Work for non-production use, personal projects, and internal testing. 
+
+Competing Use Restriction: 
+You may not use the Licensed Work to provide a commercial "Database-as-a-Service," "Managed Query Environment," or "Data Observability Platform" that competes with SessionDB's primary offerings.
+
+Terms
+The Licensor hereby grants you the right to copy, modify, create derivative works, redistribute, and make non-production use of the Licensed Work. The Licensor may make an Additional Use Grant, above, permitting limited production use.
+
+Effective on the Change Date, or the fourth anniversary of the first publicly available distribution of a specific version of the Licensed Work under this License, whichever comes first, the Licensor hereby grants you a license to that version of the Licensed Work under the terms of the Change License.
+
+Any copy you make of the Licensed Work, and any derivative work you make from the Licensed Work, except those made entirely from the version of the Licensed Work under the Change License after the Change Date, must include the notices and this License, and must be licensed under this License.
+
+This License is conditioned upon your compliance with the terms of this License. If you violate the terms of this License, your rights under this License will terminate automatically.

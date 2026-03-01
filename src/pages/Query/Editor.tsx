@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Sai Mouli Bandari Licensed under Business Source License 1.1.
 import Editor from '@monaco-editor/react';
 import { AllCommunityModule, ModuleRegistry } from 'ag-grid-community';
 import 'ag-grid-community/styles/ag-grid.css';

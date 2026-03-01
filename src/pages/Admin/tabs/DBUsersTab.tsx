@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Sai Mouli Bandari Licensed under Business Source License 1.1.
 import React, { useState } from 'react';
 import { Search, Edit2, Database, Shield, Link as LinkIcon, ChevronDown, ChevronUp, Key } from 'lucide-react';
 import { useDBUsers, DBUser, DBPrivilege } from '../../../hooks/useDBUsers';

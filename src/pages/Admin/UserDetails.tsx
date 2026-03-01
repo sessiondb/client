@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Sai Mouli Bandari Licensed under Business Source License 1.1.
 import React from 'react';
 import { X, Clock, Shield, CheckCircle, XCircle, Terminal } from 'lucide-react';
 import { User } from '../../context/AuthContext';

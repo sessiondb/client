@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Sai Mouli Bandari Licensed under Business Source License 1.1.
 import React, { createContext, useContext, useEffect, useState } from 'react';
 
 type Theme = 'default' | 'amber' | 'light-blue' | 'light-amber';

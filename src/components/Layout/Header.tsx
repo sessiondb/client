@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Sai Mouli Bandari Licensed under Business Source License 1.1.
 import React from 'react';
 import { Search, Bell, ChevronDown, Check, Server } from 'lucide-react';
 import styles from './Layout.module.css';

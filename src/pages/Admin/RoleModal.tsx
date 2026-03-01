@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Sai Mouli Bandari Licensed under Business Source License 1.1.
 import React, { useState } from 'react';
 import { X, Shield, Search, Database, Table, ChevronDown, ChevronRight } from 'lucide-react';
 import { useSchema } from '../../hooks/useSchema';

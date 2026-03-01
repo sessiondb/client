@@ -1,0 +1,23 @@
+SessionDB NOTICE
+
+SessionDB Community Edition is licensed under the Business Source License (BSL) 1.1. This NOTICE file clarifies the "Competing Use" boundaries as outlined in the LICENSE file.
+
+1. Pro Features & Proprietary Components
+The following high-value observability and enterprise features are specifically protected and are part of the SessionDB Pro/Enterprise offerings:
+- Query Insights
+- DB Metrics & Graphs
+- TTL-based Table Access
+- Auto Creds Expiry
+
+While the Core logic for bill splitting and basic RBAC is source-available in this repository, the aforementioned high-value features remain proprietary or restricted.
+
+2. Competing Use Boundary
+Under the BSL 1.1 terms for this repository, you are explicitly forbidden from using the source code to provide a commercial "Database-as-a-Service," "Managed Query Environment," or "Data Observability Platform" that competes with SessionDB's primary offerings. 
+
+If your application provides SessionDB-like database management or observability features to third parties as a paid service, you are violating the Competing Use Restriction.
+
+3. Commercial Licensing
+If you wish to bypass these BSL restrictions for commercial production use, or if you are interested in integrating SessionDB Pro features into your own commercial offerings, please contact us to discuss a commercial license.
+
+Contact for Licensing Inquiries:
+licensing@sessiondb.com (Placeholder - Please update with your actual contact email)

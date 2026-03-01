@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Sai Mouli Bandari Licensed under Business Source License 1.1.
 import React from 'react';
 import styles from './Admin.module.css';
 import { useTheme } from '../../context/ThemeContext';

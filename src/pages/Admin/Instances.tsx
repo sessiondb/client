@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Sai Mouli Bandari Licensed under Business Source License 1.1.
 import React, { useState } from 'react';
 import { Plus, Search, Edit2, Trash2, RefreshCw, Server, Activity } from 'lucide-react';
 import { useAdminInstances, useCreateInstance, useUpdateInstance, useDeleteInstance, useSyncInstance } from '../../hooks/useAdminInstances';

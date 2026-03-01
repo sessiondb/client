@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Sai Mouli Bandari Licensed under Business Source License 1.1.
 import React, { useState } from 'react';
 import { Search, Edit2, Shield, Trash2, Key, Eye } from 'lucide-react';
 import { User } from '../../../context/AuthContext';

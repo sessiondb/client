@@ -1,3 +1,4 @@
+// Copyright (c) 2026 Sai Mouli Bandari Licensed under Business Source License 1.1.
 import React, { useState } from 'react';
 import { Check, X, Shield, Clock, Database, ChevronRight, ChevronDown, User, AlertCircle, Key } from 'lucide-react';
 import { useApprovals, useApproveRequest, useRejectRequest, ApprovalRequest } from '../../hooks/useApprovals';
