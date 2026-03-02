@@ -1,0 +1,255 @@
+.logsPage {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+}
+
+.pageHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pageTitle {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 0 0 4px;
+}
+
+.pageSubtitle {
+    color: var(--text-muted);
+    font-size: 14px;
+    margin: 0;
+}
+
+.filtersArea {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 8px;
+    align-items: center;
+}
+
+.searchBox {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid var(--border);
+    padding: 10px 16px;
+    border-radius: 10px;
+    width: 440px;
+    transition: all 0.2s;
+}
+
+.searchBox:focus-within {
+    border-color: var(--primary);
+    background: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 0 0 2px var(--blue-3);
+}
+
+.searchIcon {
+    color: var(--text-muted);
+}
+
+.searchBox input {
+    background: none;
+    border: none;
+    color: var(--text-main);
+    outline: none;
+    width: 100%;
+    font-size: 14px;
+}
+
+.filterBtn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: 10px 20px;
+    border-radius: 10px;
+    color: var(--text-main);
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.filterBtn:hover {
+    background: rgba(255, 255, 255, 0.05);
+    border-color: var(--text-muted);
+}
+
+.filterBtn.active {
+    background: var(--blue-3);
+    color: var(--primary);
+    border-color: var(--primary);
+}
+
+.advancedFilters {
+    margin-bottom: 16px;
+    border: 1px solid var(--border);
+}
+
+.filterGrid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 24px;
+}
+
+.filterGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.filterGroup label {
+    font-size: 11px;
+    text-transform: uppercase;
+    font-weight: 700;
+    color: var(--text-muted);
+    letter-spacing: 0.05em;
+}
+
+.filterGroup input {
+    background: var(--bg-main);
+    border: 1px solid var(--border);
+    padding: 10px 14px;
+    border-radius: 8px;
+    color: var(--text-main);
+    font-size: 14px;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.filterGroup input:focus {
+    border-color: var(--primary);
+    box-shadow: 0 0 0 2px var(--blue-3);
+}
+
+.tableContainer {
+    max-height: calc(100vh - 360px);
+    overflow-y: auto;
+    position: relative;
+    border-radius: 0 0 var(--radius) var(--radius);
+}
+
+.table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+}
+
+.table th {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    text-align: left;
+    padding: 14px 20px;
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    white-space: nowrap;
+}
+
+.table td {
+    padding: 16px 20px;
+    border-bottom: 1px solid var(--border-subtle);
+    font-size: 14px;
+    background: var(--bg-card);
+}
+
+/* Specific column widths */
+.table th:nth-child(1),
+.table td:nth-child(1) {
+    width: 180px;
+}
+
+.table th:nth-child(2),
+.table td:nth-child(2) {
+    width: 150px;
+}
+
+.table th:nth-child(3),
+.table td:nth-child(3) {
+    width: 120px;
+}
+
+.table th:nth-child(4),
+.table td:nth-child(4) {
+    width: 150px;
+}
+
+.table th:nth-child(6),
+.table td:nth-child(6) {
+    width: 120px;
+}
+
+.table tr:last-child td {
+    border-bottom: none;
+}
+
+.timeLabel,
+.userLabel,
+.statusLabel {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text-muted);
+    font-size: 13px;
+}
+
+.userLabel {
+    color: var(--text-main);
+    font-weight: 500;
+}
+
+.sessionSubtext {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 400;
+}
+
+.actionBadge {
+    background: rgba(var(--primary-rgb, 50, 96, 231), 0.1);
+    color: var(--primary);
+    padding: 4px 10px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.queryCell {
+    max-width: 400px;
+}
+
+.queryInline {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    color: var(--text-main);
+    background: rgba(255, 255, 255, 0.03);
+    padding: 6px 10px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+}
+
+.emptyRow {
+    padding: 80px 0;
+    text-align: center;
+    color: var(--text-muted);
+    font-style: italic;
+}
+
+.statusLabel {
+    font-weight: 600;
+    font-size: 12px;
+}
