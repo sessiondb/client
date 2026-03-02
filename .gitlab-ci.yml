@@ -1,36 +1,76 @@
 stages:
   - sync
+  - publish
 
+# 1. SCRUB & SYNC: Prepare the Community Edition and push to GitHub
 github_community_sync:
   stage: sync
   image: alpine:latest
   only:
     - main
+    - tags
   before_script:
     - apk add --no-cache git openssh
     - git config --global user.name "GitLab CI Bot"
     - git config --global user.email "ci-bot@sessiondb.com"
   script:
-    # 1. Prepare the scrubbed branch
+    # Prepare the clean branch
     - git checkout -b github-sync-temp
     
-    # 2. Apply Community-only rules
+    # Apply Community Rules (Swap gitignore)
     - mv .gitignore.community .gitignore
         
-    # 3. Scrub Pro Backend logic
+    # PHYSICAL SCRUB: Remove Pro Logic (Redash-plus features)
     - rm -rf internal/premium/
-    
-    # 4. Scrub Pro Frontend logic
     - rm -rf src/features/Premium/
-
-    # 5. Remove GitLab CI configuration
+    
+    # HOUSEKEEPING: Remove the GitLab CI file so it's not public
     - rm -f .gitlab-ci.yml
     
-    # 6. Stage all deletions and changes
+    # Commit and Push to GitHub (Using the x-access-token fix)
     - git add .
-    
-    # 7. Commit changes (using single quotes for colon safety)
     - 'git commit -m "chore: sync community edition [skip ci]" || echo "No changes to sync"'
-    
-    # 8. Push to GitHub (Using the x-access-token fix)
     - git push --force https://x-access-token:${GH_TOKEN}@github.com/SaimouliBandari/sessiondb-ui.git github-sync-temp:main
+
+# 2. PUBLISH: Build and Push Docker Images (UI First)
+publish_community_docker:
+  stage: publish
+  image: docker:latest
+  services:
+    - docker:dind
+  only:
+    - main
+    - tags
+  before_script:
+    - echo "$DOCKER_HUB_TOKEN" | docker login -u "$DOCKER_HUB_USER" --password-stdin
+  script:
+    # Ensure we are using the scrubbed code from the previous stage
+    - git fetch origin github-sync-temp
+    - git checkout github-sync-temp
+
+    # SMART TAGGING LOGIC
+    # If you push a tag (e.g. v1.0.0-beta.1), it uses that. Otherwise, it uses 'latest'.
+    - |
+      if [ -n "$CI_COMMIT_TAG" ]; then
+        export IMAGE_TAG=$CI_COMMIT_TAG
+      else
+        export IMAGE_TAG="latest"
+      fi
+    - echo "Publishing SessionDB Version $IMAGE_TAG"
+
+    # --- UI BUILD (PRIORITY) ---
+    - docker build -t $DOCKER_HUB_USER/sessiondb-ui:$IMAGE_TAG ./client
+    - docker push $DOCKER_HUB_USER/sessiondb-ui:$IMAGE_TAG
+    
+    # --- BACKEND BUILD ---
+    - docker build -t $DOCKER_HUB_USER/sessiondb-backend:$IMAGE_TAG ./server
+    - docker push $DOCKER_HUB_USER/sessiondb-backend:$IMAGE_TAG
+
+    # AUTO-TAG LATEST (If a specific beta tag was used, also update 'latest' to point to it)
+    - |
+      if [ -n "$CI_COMMIT_TAG" ]; then
+        docker tag $DOCKER_HUB_USER/sessiondb-ui:$IMAGE_TAG $DOCKER_HUB_USER/sessiondb-ui:latest
+        docker push $DOCKER_HUB_USER/sessiondb-ui:latest
+        docker tag $DOCKER_HUB_USER/sessiondb-backend:$IMAGE_TAG $DOCKER_HUB_USER/sessiondb-backend:latest
+        docker push $DOCKER_HUB_USER/sessiondb-backend:latest
+      fi
