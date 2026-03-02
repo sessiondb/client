@@ -17,15 +17,20 @@ github_community_sync:
     # 2. Apply Community-only rules
     - mv .gitignore.community .gitignore
         
-    # 3. Scrub Pro Backend logic (Ref: image_da7201.png)
+    # 3. Scrub Pro Backend logic
     - rm -rf internal/premium/
     
-    # 4. Scrub Pro Frontend logic (Ref: image_b269b4.png)
+    # 4. Scrub Pro Frontend logic
     - rm -rf src/features/Premium/
+
+    # 5. Remove GitLab CI configuration
+    - rm -f .gitlab-ci.yml
     
-    # 5. Record the deletions and .gitignore change
+    # 6. Stage all deletions and changes
     - git add .
     
-    # 6. Commit and push to GitHub
+    # 7. Commit changes (using single quotes for colon safety)
     - 'git commit -m "chore: sync community edition [skip ci]" || echo "No changes to sync"'
-    - git push --force https://${GH_TOKEN}@github.com/SaimouliBandari/sessiondb-ui.git github-sync-temp:main
+    
+    # 8. Push to GitHub (Using the x-access-token fix)
+    - git push --force https://x-access-token:${GH_TOKEN}@github.com/SaimouliBandari/sessiondb-ui.git github-sync-temp:main
