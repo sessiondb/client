@@ -35,7 +35,7 @@ publish_community_docker:
     - echo "$DOCKER_HUB_TOKEN" | docker login -u "$DOCKER_HUB_USER" --password-stdin
   script:
     # We must RE-SCRUB here because this is a fresh runner environment
-    - git checkout -b docker-build-temp
+    # Deleting these directly from the runner disk correctly prepares the Docker build context
     - mv .gitignore.community .gitignore
     - rm -rf internal/premium/ src/features/Premium/ .gitlab-ci.yml
     
