@@ -1,6 +1,8 @@
 stages:
   - sync
+  - publish
 
+# 1. ALWAYS SYNC TO GITHUB (On every push to main)
 github_community_sync:
   stage: sync
   image: alpine:latest
@@ -11,21 +13,38 @@ github_community_sync:
     - git config --global user.name "GitLab CI Bot"
     - git config --global user.email "ci-bot@sessiondb.com"
   script:
-    # 1. Prepare the scrubbed branch
     - git checkout -b github-sync-temp
-    
-    # 2. Apply Community-only rules
     - mv .gitignore.community .gitignore
-        
-    # 3. Scrub Pro Backend logic (Ref: image_da7201.png)
-    - rm -rf internal/premium/
-    
-    # 4. Scrub Pro Frontend logic (Ref: image_b269b4.png)
-    - rm -rf src/features/Premium/
-    
-    # 5. Record the deletions and .gitignore change
+    - rm -rf internal/premium/ src/features/Premium/ .gitlab-ci.yml
     - git add .
+    - git commit -m "[chore] sync community edition [skip ci]" || echo "No changes to sync"
+    - git push --force https://x-access-token:${GH_TOKEN}@github.com/SaimouliBandari/sessiondb-ui.git github-sync-temp:main
+
+# 2. PUBLISH TO DOCKER (ONLY when you push a Git Tag)
+publish_community_docker:
+  stage: publish
+  image: docker:latest
+  services:
+    - docker:dind
+  only:
+    - tags  # <--- THIS IS THE KEY CHANGE
+  before_script:
+    - apk add --no-cache git openssh
+    - git config --global user.name "GitLab CI Bot"
+    - git config --global user.email "ci-bot@sessiondb.com"
+    - echo "$DOCKER_HUB_TOKEN" | docker login -u "$DOCKER_HUB_USER" --password-stdin
+  script:
+    # We must RE-SCRUB here because this is a fresh runner environment
+    - git checkout -b docker-build-temp
+    - mv .gitignore.community .gitignore
+    - rm -rf internal/premium/ src/features/Premium/ .gitlab-ci.yml
     
-    # 6. Commit and push to GitHub
-    - 'git commit -m "chore: sync community edition [skip ci]" || echo "No changes to sync"'
-    - git push --force https://${GH_TOKEN}@github.com/SaimouliBandari/sessiondb-ui.git github-sync-temp:main
+    # Use the tag name for the Docker image (e.g., v1.0.0-beta.1)
+    - export IMAGE_TAG=$CI_COMMIT_TAG
+    - echo "Publishing >> Tagged Release $IMAGE_TAG"'
+
+    # --- UI BUILD (Frontend First) ---
+    - docker build -t $DOCKER_HUB_USER/sessiondb-ui:$IMAGE_TAG ./client
+    - docker tag $DOCKER_HUB_USER/sessiondb-ui:$IMAGE_TAG $DOCKER_HUB_USER/sessiondb-ui:latest
+    - docker push $DOCKER_HUB_USER/sessiondb-ui:$IMAGE_TAG
+    - docker push $DOCKER_HUB_USER/sessiondb-ui:latest
