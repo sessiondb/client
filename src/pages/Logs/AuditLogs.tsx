@@ -20,7 +20,7 @@ const AuditLogs: React.FC = () => {
     const handleExport = async () => {
         if (!canExport) {
             const feature = getFeature('audit_logs_export');
-            setExportError(`Export is available on the ${feature?.minimumPlan || 'Pro'} plan. Upgrade to export audit logs.`);
+            setExportError(`Export is on our roadmap and not yet available. We’ll notify you when it’s ready.`);
             return;
         }
         setExportError(null);
@@ -37,7 +37,7 @@ const AuditLogs: React.FC = () => {
         } catch (err: unknown) {
             const ax = err as { response?: { status?: number; data?: { code?: string; error?: string } } };
             if (ax?.response?.status === 403 && (ax?.response?.data?.code === 'plan_upgrade_required' || ax?.response?.data?.error)) {
-                setExportError(ax.response.data?.error || 'Upgrade to Pro to export audit logs.');
+                setExportError(ax.response.data?.error || 'Export is coming soon. We’ll notify you when it’s ready.');
             } else {
                 setExportError('Export failed. Please try again.');
             }
@@ -79,11 +79,11 @@ const AuditLogs: React.FC = () => {
                     className="btn-secondary"
                     style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
                     onClick={handleExport}
-                    title={!canExport ? 'Upgrade to Pro to export' : 'Download audit logs as CSV'}
+                    title={!canExport ? 'Export coming soon' : 'Download audit logs as CSV'}
                 >
                     {!canExport && <Lock size={16} />}
                     <Download size={18} />
-                    Export CSV {!canExport && '(Pro)'}
+                    Export CSV {!canExport && '(Planned)'}
                 </button>
             </div>
             {exportError && (

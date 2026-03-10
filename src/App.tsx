@@ -95,7 +95,7 @@ const App: React.FC = () => {
                                 </FeatureGate>
                             } />
 
-                            {/* Pro Admin Features */}
+                            {/* Roadmap features (in development) */}
                             <Route path="insights" element={
                                 <FeatureGate featureKey="query_insights">
                                     <Suspense fallback={<div>Loading insights...</div>}>
