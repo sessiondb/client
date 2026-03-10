@@ -94,7 +94,7 @@ const Sessions: React.FC = () => {
     <div className={styles.pageContainer}>
       <div className={styles.pageHeader}>
         <div>
-          <h1 className={styles.pageTitle}>Sessions (Premium)</h1>
+          <h1 className={styles.pageTitle}>Sessions (Planned)</h1>
           <p className={styles.pageSubtitle}>Ephemeral credential sessions per instance</p>
         </div>
       </div>

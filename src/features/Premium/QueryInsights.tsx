@@ -1,5 +1,5 @@
 // Copyright (c) 2026 Sai Mouli Bandari Licensed under Business Source License 1.1.
-/** Premium stub: Query Insights. Replace with full implementation when available. */
+/** Roadmap: Query Insights. In development; replace with full implementation when available. */
 import React from 'react';
 import { UpgradePrompt } from '../UpgradePrompt';
 

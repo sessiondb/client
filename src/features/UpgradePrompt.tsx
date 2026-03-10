@@ -13,10 +13,10 @@ export const UpgradePrompt: React.FC<{ feature: string }> = ({ feature }) => {
                 <Lock size={32} />
             </div>
             <h2 style={{ fontSize: '1.5rem', marginBottom: '0.5rem', color: 'var(--text)' }}>
-                Unlock Premium Features
+                Coming soon
             </h2>
             <p style={{ color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
-                The <strong>{feature.replace(/_/g, ' ')}</strong> feature is only available on the {featureData?.minimumPlan || 'Pro'} plan.
+                The <strong>{feature.replace(/_/g, ' ')}</strong> feature is on our roadmap and currently in development.
             </p>
         </div>
     );

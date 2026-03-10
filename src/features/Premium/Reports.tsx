@@ -120,7 +120,7 @@ const Reports: React.FC = () => {
     <div className={styles.pageContainer}>
       <div className={styles.pageHeader}>
         <div>
-          <h1 className={styles.pageTitle}>Reports (Premium)</h1>
+          <h1 className={styles.pageTitle}>Reports (Planned)</h1>
           <p className={styles.pageSubtitle}>Report definitions and executions</p>
         </div>
       </div>
