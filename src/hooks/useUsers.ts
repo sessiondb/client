@@ -28,13 +28,17 @@ export const useUser = (id: string) => {
     });
 };
 
+/** Normalized create-user result: always { data, emailSent? } for consistent handling in UI */
+export type CreateUserResponse = { data: User; emailSent?: boolean; emailError?: string };
+
 // Hook for Create User
 export const useCreateUser = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: async (userData: Partial<User>) => {
-            const res = await apiClient.post('/users', userData);
-            return res.data.data;
+        mutationFn: async (userData: Partial<User> & { sendCredentialsEmail?: boolean }) => {
+            const res = await apiClient.post<CreateUserResponse>('/users', userData);
+            const data = res.data;
+            return (data && typeof data === 'object' && 'data' in data) ? data : { data: data as User };
         },
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['users'] });

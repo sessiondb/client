@@ -10,10 +10,13 @@ import { useRoles, Role } from '../../hooks/useRoles';
 import styles from './Admin.module.css';
 import { useInstance } from '../../context/InstanceContext';
 
+/** Payload for create/update: User plus optional sendCredentialsEmail (create only). */
+export type UserSavePayload = User & { sendCredentialsEmail?: boolean };
+
 interface UserModalProps {
     user?: User;
     onClose: () => void;
-    onSave: (user: User) => void;
+    onSave: (user: UserSavePayload) => void;
 }
 
 const UserModal: React.FC<UserModalProps> = ({ user, onClose, onSave }) => {
@@ -32,8 +35,7 @@ const UserModal: React.FC<UserModalProps> = ({ user, onClose, onSave }) => {
     const [permissions, setPermissions] = useState<DBPermission[]>(user?.permissions || []);
     const [searchQuery, setSearchQuery] = useState('');
     const [expandedDBs, setExpandedDBs] = useState<string[]>(schema?.databases?.slice(0, 1).map(db => db.database) || []);
-
-
+    const [sendCredentialsEmail, setSendCredentialsEmail] = useState(false);
 
     const generatePassword = () => {
         const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*()';
@@ -143,7 +145,8 @@ const UserModal: React.FC<UserModalProps> = ({ user, onClose, onSave }) => {
             savedScripts: user?.savedScripts || [],
             queryTabs: user?.queryTabs || []
         };
-        onSave(newUser);
+        const payload: UserSavePayload = user ? newUser : { ...newUser, sendCredentialsEmail };
+        onSave(payload);
     };
 
     const filteredDatabases = schema?.databases?.map(db => {
@@ -216,6 +219,19 @@ const UserModal: React.FC<UserModalProps> = ({ user, onClose, onSave }) => {
                                             <RefreshCw size={16} />
                                         </button>
                                     </div>
+                                </div>
+                            )}
+
+                            {!user && (
+                                <div className={styles.formGroup} style={{ justifyContent: 'flex-start' }}>
+                                    <label style={{ display: 'flex', alignItems: 'center', gap: '8px', cursor: 'pointer' }}>
+                                        <input
+                                            type="checkbox"
+                                            checked={sendCredentialsEmail}
+                                            onChange={(e) => setSendCredentialsEmail(e.target.checked)}
+                                        />
+                                        Send credentials to user by email
+                                    </label>
                                 </div>
                             )}
 
