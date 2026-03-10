@@ -12,7 +12,10 @@ import {
     ChevronLeft,
     DatabaseZap,
     Bot,
-    Lock
+    Lock,
+    Clock,
+    Bell,
+    FileText
 } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
 import { useLayout } from '../../context/LayoutContext';
@@ -41,12 +44,15 @@ const Sidebar: React.FC = () => {
                 { name: 'Approvals', path: '/admin/approvals', icon: ClipboardCheck, requiredPermission: 'approvals:manage' },
                 { name: 'Instances', path: '/admin/instances', icon: DatabaseZap, requiredPermission: 'instances:manage' },
                 { name: 'AI Config', path: '/admin/ai-config', icon: Bot },
+                { name: 'Sessions', path: '/admin/sessions', icon: Clock, requiredFeature: 'sessions' },
+                { name: 'Alerts', path: '/admin/alerts', icon: Bell, requiredFeature: 'alerts' },
+                { name: 'Reports', path: '/admin/reports', icon: FileText, requiredFeature: 'reports' },
                 { name: 'DB Metrics', path: '/admin/metrics', icon: DatabaseZap, requiredFeature: 'db_metrics' },
                 { name: 'Creds Expiry', path: '/admin/expiry', icon: ShieldCheck, requiredFeature: 'auto_creds_expiry' },
                 { name: 'TTL Access', path: '/admin/ttl', icon: ClipboardCheck, requiredFeature: 'ttl_table_access' },
             ]
         },
-        { name: 'Audit Logs', path: '/logs', icon: History, requiredPermission: 'logs:view', requiredFeature: 'audit_logs' },
+        { name: 'Audit Logs', path: '/logs', icon: History, requiredPermission: 'logs:view' },
     ];
 
     const canAccessMenuItem = (item: any) => {
