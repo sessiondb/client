@@ -1,0 +1,33 @@
+---
+description: Frontend lives in this repo; premium feature UI goes in src/features/Premium/
+alwaysApply: true
+---
+
+# Frontend Location and Premium Features
+
+## Frontend codebase
+
+All **frontend (UI)** changes for SessionDB belong in **this repository** at:
+
+`/Users/mouli.b/Documents/personal/projects/sessiondb`
+
+Do not add frontend code to the backend/server repo. When asked to implement or change UI, work in this folder.
+
+## Premium features (UI)
+
+Premium feature **components and pages** must live under:
+
+`src/features/Premium/`
+
+- Add new premium feature **screens/components** under `src/features/Premium/` (e.g. `Sessions.tsx`, `Alerts.tsx`, `Reports.tsx` for premium-only pages).
+- Register lazy-loaded premium components in `src/features/premium-registry.tsx` and reference them from `App.tsx` via the registry.
+- Use `FeatureGate` with the appropriate `featureKey` for routes that require a premium plan; register the feature key in `src/context/AccessContext.tsx` under `currentFeatures` if needed.
+
+## Summary
+
+| What | Where |
+|------|--------|
+| All frontend code | This repo (sessiondb at the path above) |
+| Premium feature UI components | `src/features/Premium/` |
+| Premium registry (lazy imports) | `src/features/premium-registry.tsx` |
+| Feature flags for premium | `src/context/AccessContext.tsx` → `currentFeatures` |
