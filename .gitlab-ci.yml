@@ -6,6 +6,8 @@ stages:
 github_community_sync:
   stage: sync
   image: alpine:latest
+  variables:
+    GIT_DEPTH: 0  # full clone so push to GitHub has all objects (avoids "did not receive expected object")
   only:
     - main
   before_script:
