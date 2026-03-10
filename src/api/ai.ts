@@ -5,9 +5,10 @@
  */
 import apiClient from './client';
 
-/** Current AI provider config (no API key exposed). */
+/** Current AI provider config (no API key exposed). source indicates whether user or org key is in use. */
 export type AIConfig = {
   configured: boolean;
+  source?: 'user' | 'global';
   providerType?: string;
   modelName?: string;
   baseUrl?: string | null;
@@ -18,6 +19,31 @@ export type GenerateSQLResponse = { sql: string; requiresApproval: boolean };
 
 /** Response from explain endpoint. */
 export type ExplainResponse = { explanation: string };
+
+/** Current user AI usage (last 30 days). */
+export type AIUsageResponse = { usage: Array<{ id: string; feature: string; usedGlobal: boolean; createdAt: string }>; total: number };
+
+/** Admin AI usage: global totals and per-user summary (last 30 days). Go returns UserID, Count, Input, Output. */
+export type AdminAIUsageResponse = {
+  global: { count: number; inputTokens: number; outputTokens: number };
+  byUser: Array<{ UserID: string; Count: number; Input: number; Output: number }>;
+};
+
+/**
+ * Fetches the current user's AI usage for the last 30 days.
+ */
+export async function getAIUsage(): Promise<AIUsageResponse> {
+  const { data } = await apiClient.get<AIUsageResponse>('/ai/usage');
+  return data;
+}
+
+/**
+ * Fetches global and per-user AI usage summary (admin only). Last 30 days.
+ */
+export async function getAdminAIUsage(): Promise<AdminAIUsageResponse> {
+  const { data } = await apiClient.get<AdminAIUsageResponse>('/admin/ai/usage');
+  return data;
+}
 
 /**
  * Fetches the current user's AI provider configuration.
@@ -40,6 +66,19 @@ export async function updateAIConfig(params: {
   modelName: string;
 }): Promise<void> {
   await apiClient.put('/ai/config', params);
+}
+
+/**
+ * Updates the organization-wide AI config (admin only). Same params as updateAIConfig.
+ * @param params - providerType, apiKey, optional baseUrl, modelName
+ */
+export async function updateGlobalAIConfig(params: {
+  providerType: string;
+  apiKey: string;
+  baseUrl?: string | null;
+  modelName: string;
+}): Promise<void> {
+  await apiClient.put('/admin/ai-config', params);
 }
 
 /**

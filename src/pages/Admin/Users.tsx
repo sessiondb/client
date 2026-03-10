@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { UserPlus, Key, Shield } from 'lucide-react';
 
-import { useUsers, useCreateUser, useUpdateUser, useDeleteUser } from '../../hooks/useUsers';
+import { useUsers, useCreateUser, useUpdateUser, useDeleteUser, type CreateUserResponse } from '../../hooks/useUsers';
 import { useAuthConfig, useUpdateAuthConfig } from '../../hooks/useAuthConfig';
 import { User } from '../../context/AuthContext';
 import UserModal from './UserModal';
@@ -26,6 +26,7 @@ const UserManagement: React.FC = () => {
     const [resetPasswordUser, setResetPasswordUser] = useState<User | undefined>(undefined);
     const [selectedUserForDetails, setSelectedUserForDetails] = useState<User | undefined>(undefined);
     const [activeTab, setActiveTab] = useState<'platform_users' | 'db_users' | 'settings'>('platform_users');
+    const [createMessage, setCreateMessage] = useState<string | null>(null);
 
     const handleOpenCreate = () => {
         setEditingUser(undefined);
@@ -41,14 +42,27 @@ const UserManagement: React.FC = () => {
         setSelectedUserForDetails(user);
     };
 
-    const handleSaveUser = (user: User) => {
+    const handleSaveUser = (user: import('./UserModal').UserSavePayload) => {
         if (editingUser) {
-            updateUserMutation.mutate({ ...user, id: editingUser.id });
+            updateUserMutation.mutate(
+                { ...user, id: editingUser.id },
+                { onSuccess: () => setIsModalOpen(false) }
+            );
         } else {
-            // New user with password
-            createUserMutation.mutate(user);
+            createUserMutation.mutate(user, {
+                onSuccess: (result: CreateUserResponse) => {
+                    setIsModalOpen(false);
+                    if (result?.emailSent) {
+                        setCreateMessage('User created. Credentials have been sent by email.');
+                    } else if (result?.emailSent === false && result?.emailError) {
+                        setCreateMessage('User created. Email could not be sent; share credentials manually.');
+                    } else {
+                        setCreateMessage('User created.');
+                    }
+                    setTimeout(() => setCreateMessage(null), 5000);
+                }
+            });
         }
-        setIsModalOpen(false);
     };
 
     const handleResetPassword = (user: User) => {
@@ -78,6 +92,11 @@ const UserManagement: React.FC = () => {
                 <div>
                     <h1 className={styles.pageTitle}>User Management</h1>
                     <p className={styles.pageSubtitle}>Manage system users, granular DB permissions, and session access.</p>
+                    {createMessage && (
+                        <output style={{ display: 'block', marginTop: 8, padding: '8px 12px', background: 'var(--bg-subtle)', border: '1px solid var(--border-subtle)', borderRadius: 8, color: 'var(--text-muted)', fontSize: 14 }}>
+                            {createMessage}
+                        </output>
+                    )}
                 </div>
                 {activeTab === 'platform_users' && (
                     <button className="btn-primary" onClick={handleOpenCreate} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>

@@ -11,35 +11,57 @@ interface AccessContextType {
 
 const AccessContext = createContext<AccessContextType | undefined>(undefined);
 
+// Normalize role to a key so we match both API role name ("Super Admin") and key ("super_admin").
+function roleKey(role: string | { name?: string; key?: string } | undefined): string {
+    if (!role) return '';
+    if (typeof role !== 'string') {
+        const r = role as { name?: string; key?: string };
+        return roleKey(r.key ?? r.name);
+    }
+    return role.toLowerCase().replace(/\s+/g, '_');
+}
+
+function getDefaultPermissionsForRole(role: string): string[] {
+    switch (role) {
+        case 'super_admin': return ['users:read', 'users:write', 'roles:manage', 'instances:manage', 'logs:view', 'metrics:view', 'insights:view', 'ttl:manage', 'approvals:manage'];
+        case 'maintainer': return ['users:read', 'instances:manage', 'logs:view', 'metrics:view', 'approvals:manage'];
+        case 'developer': return ['users:read', 'instances:read'];
+        case 'analyst': return ['instances:read', 'logs:view'];
+        default: return [];
+    }
+}
+
 export const AccessProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { user } = useAuth();
 
-    // Fallback Mock Data for Development
-    const currentPermissions = user?.rbacPermissions || (
-        user?.role === 'super_admin' ? ['users:read', 'users:write', 'roles:manage', 'instances:manage', 'logs:view', 'metrics:view', 'insights:view', 'ttl:manage'] :
-            user?.role === 'maintainer' ? ['users:read', 'instances:manage', 'logs:view', 'metrics:view'] :
-                [] // viewer
-    );
+    const role = roleKey(user?.role);
+    const currentPermissions = (user?.rbacPermissions && user.rbacPermissions.length > 0)
+        ? user.rbacPermissions
+        : getDefaultPermissionsForRole(role);
 
-    // Provide the required "Pro Features" specified by the user as false for Community mode
+    // Roadmap features (in development) — shown as "Planned" / "Coming soon" per landing-page strategy
     const currentFeatures = user?.tenantFeatures || {
         'audit_logs': { enabled: true },
-        'query_insights': { enabled: false, minimumPlan: 'Pro', reason: 'plan_upgrade_required' },
-        'db_metrics': { enabled: false, minimumPlan: 'Pro', reason: 'plan_upgrade_required' },
-        'auto_creds_expiry': { enabled: false, minimumPlan: 'Enterprise', reason: 'plan_upgrade_required' },
-        'ttl_table_access': { enabled: false, minimumPlan: 'Enterprise', reason: 'plan_upgrade_required' }
+        'audit_logs_export': { enabled: false, minimumPlan: 'Planned', reason: 'feature_in_development' },
+        'query_insights': { enabled: false, minimumPlan: 'Planned', reason: 'feature_in_development' },
+        'db_metrics': { enabled: false, minimumPlan: 'Planned', reason: 'feature_in_development' },
+        'sessions': { enabled: false, minimumPlan: 'Planned', reason: 'feature_in_development' },
+        'alerts': { enabled: false, minimumPlan: 'Planned', reason: 'feature_in_development' },
+        'reports': { enabled: false, minimumPlan: 'Planned', reason: 'feature_in_development' },
+        'auto_creds_expiry': { enabled: false, minimumPlan: 'Planned', reason: 'feature_in_development' },
+        'ttl_table_access': { enabled: false, minimumPlan: 'Planned', reason: 'feature_in_development' }
     };
 
     const value = useMemo(() => {
         return {
             hasPermission: (permission: string) => {
                 if (!user) return false;
-                if (user.role === 'super_admin') return true;
+                if (role === 'super_admin') return true;
                 return currentPermissions.includes(permission);
             },
             hasAnyPermission: (permissions: string[]) => {
                 if (!user) return false;
-                if (user.role === 'super_admin') return true;
+                if (role === 'super_admin') return true;
                 return permissions.some(p => currentPermissions.includes(p));
             },
             getFeature: (featureKey: string) => {
@@ -50,7 +72,7 @@ export const AccessProvider: React.FC<{ children: React.ReactNode }> = ({ childr
                 return feature ? feature.enabled : false;
             }
         };
-    }, [user, currentPermissions, currentFeatures]);
+    }, [user, role, currentPermissions, currentFeatures]);
 
     return (
         <AccessContext.Provider value={value}>

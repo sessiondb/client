@@ -1,16 +1,48 @@
 // Copyright (c) 2026 Sai Mouli Bandari Licensed under Business Source License 1.1.
 import React, { useState } from 'react';
-import { Search, Filter, Download, Clock, User, Zap, AlertTriangle, CheckCircle } from 'lucide-react';
+import { Search, Filter, Download, Clock, User, Zap, AlertTriangle, CheckCircle, Lock } from 'lucide-react';
 import { useLogs, AuditLog } from '../../hooks/useLogs';
+import { useAccess } from '../../context/AccessContext';
+import apiClient from '../../api/client';
 import styles from './Logs.module.css';
 
 const AuditLogs: React.FC = () => {
     const { data: logs = [], isLoading, isError, error } = useLogs();
+    const { isFeatureEnabled, getFeature } = useAccess();
+    const canExport = isFeatureEnabled('audit_logs_export');
     const [search, setSearch] = useState('');
     const [filterUser, setFilterUser] = useState('');
     const [filterSessionUser, setFilterSessionUser] = useState('');
     const [filterTable, setFilterTable] = useState('');
     const [showFilters, setShowFilters] = useState(false);
+    const [exportError, setExportError] = useState<string | null>(null);
+
+    const handleExport = async () => {
+        if (!canExport) {
+            const feature = getFeature('audit_logs_export');
+            setExportError(`Export is on our roadmap and not yet available. We’ll notify you when it’s ready.`);
+            return;
+        }
+        setExportError(null);
+        try {
+            const res = await apiClient.get('/logs/export', { responseType: 'blob' });
+            const url = window.URL.createObjectURL(new Blob([res.data]));
+            const a = document.createElement('a');
+            a.href = url;
+            a.setAttribute('download', 'audit-logs.csv');
+            document.body.appendChild(a);
+            a.click();
+            a.remove();
+            window.URL.revokeObjectURL(url);
+        } catch (err: unknown) {
+            const ax = err as { response?: { status?: number; data?: { code?: string; error?: string } } };
+            if (ax?.response?.status === 403 && (ax?.response?.data?.code === 'plan_upgrade_required' || ax?.response?.data?.error)) {
+                setExportError(ax.response.data?.error || 'Export is coming soon. We’ll notify you when it’s ready.');
+            } else {
+                setExportError('Export failed. Please try again.');
+            }
+        }
+    };
 
     const filteredLogs = logs.filter((log: AuditLog) => {
         const matchesSearch = !search ||
@@ -42,11 +74,23 @@ const AuditLogs: React.FC = () => {
                     <h1 className={styles.pageTitle}>Audit Logs</h1>
                     <p className={styles.pageSubtitle}>Track all user activities, query executions, and system changes.</p>
                 </div>
-                <button className="btn-secondary" style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <button
+                    type="button"
+                    className="btn-secondary"
+                    style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
+                    onClick={handleExport}
+                    title={!canExport ? 'Export coming soon' : 'Download audit logs as CSV'}
+                >
+                    {!canExport && <Lock size={16} />}
                     <Download size={18} />
-                    Export CSV
+                    Export CSV {!canExport && '(Planned)'}
                 </button>
             </div>
+            {exportError && (
+                <div role="alert" style={{ marginTop: 8, padding: '8px 12px', background: 'var(--bg-subtle)', border: '1px solid var(--border-subtle)', borderRadius: 8, color: 'var(--text-muted)', fontSize: 14 }}>
+                    {exportError}
+                </div>
+            )}
 
             <div className={styles.filtersArea}>
                 <div className={styles.searchBox}>

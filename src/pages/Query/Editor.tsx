@@ -17,6 +17,7 @@ import CredentialGateModal from './CredentialGateModal';
 import { ERR_USER_CREDS_INV, ERR_USER_CREDS_REQ, ERR_FORBIDDEN } from '../../constants/errorCodes';
 import { getApiErrorMessage, getApiErrorCode } from '../../api/errors';
 import { getAIConfig, generateSQL, explainQuery } from '../../api/ai';
+import { stripSqlFromMarkdown } from '../../utils/sqlMarkdown';
 import { useQuery } from '@tanstack/react-query';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
@@ -302,7 +303,7 @@ const SQLQueryEditor: React.FC = () => {
         try {
             const data = await generateSQL(currentInstanceId, generatePrompt.trim());
             if (activeTab) {
-                handleQueryChange(data.sql);
+                handleQueryChange(stripSqlFromMarkdown(data.sql));
             }
             setShowGenerateModal(false);
             if (data.requiresApproval) {
