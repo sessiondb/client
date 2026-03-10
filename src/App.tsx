@@ -19,7 +19,7 @@ import { ThemeProvider } from './context/ThemeContext';
 
 import { PremiumRegistry } from './features/premium-registry';
 
-const { QueryInsights, DBMetrics, AutoCredsExpiry, TTLTableAccess } = PremiumRegistry;
+const { QueryInsights, DBMetrics, AutoCredsExpiry, TTLTableAccess, Sessions, Alerts, Reports } = PremiumRegistry;
 
 const PrivateRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const { isAuthenticated, isLoading } = useAuth();
@@ -73,6 +73,27 @@ const App: React.FC = () => {
                             } />
                             <Route path="settings" element={<Settings />} />
                             <Route path="ai-config" element={<SettingsAIConfig />} />
+                            <Route path="sessions" element={
+                                <FeatureGate featureKey="sessions">
+                                    <Suspense fallback={<div>Loading...</div>}>
+                                        <Sessions />
+                                    </Suspense>
+                                </FeatureGate>
+                            } />
+                            <Route path="alerts" element={
+                                <FeatureGate featureKey="alerts">
+                                    <Suspense fallback={<div>Loading...</div>}>
+                                        <Alerts />
+                                    </Suspense>
+                                </FeatureGate>
+                            } />
+                            <Route path="reports" element={
+                                <FeatureGate featureKey="reports">
+                                    <Suspense fallback={<div>Loading...</div>}>
+                                        <Reports />
+                                    </Suspense>
+                                </FeatureGate>
+                            } />
 
                             {/* Pro Admin Features */}
                             <Route path="insights" element={
@@ -105,12 +126,10 @@ const App: React.FC = () => {
                             } />
                         </Route>
 
-                        {/* Logs Feature */}
+                        {/* Audit Logs — community feature (permission-only) */}
                         <Route path="logs" element={
                             <PermissionGate required="logs:view" fallback={<Navigate to="/query" replace />}>
-                                <FeatureGate featureKey="audit_logs">
-                                    <AuditLogs />
-                                </FeatureGate>
+                                <AuditLogs />
                             </PermissionGate>
                         } />
                     </Route>
