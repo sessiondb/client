@@ -39,17 +39,17 @@ export const AccessProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         ? user.rbacPermissions
         : getDefaultPermissionsForRole(role);
 
-    // Provide the required "Pro Features" specified by the user as false for Community mode
+    // Roadmap features (in development) — shown as "Planned" / "Coming soon" per landing-page strategy
     const currentFeatures = user?.tenantFeatures || {
         'audit_logs': { enabled: true },
-        'audit_logs_export': { enabled: false, minimumPlan: 'Pro', reason: 'plan_upgrade_required' },
-        'query_insights': { enabled: false, minimumPlan: 'Pro', reason: 'plan_upgrade_required' },
-        'db_metrics': { enabled: false, minimumPlan: 'Pro', reason: 'plan_upgrade_required' },
-        'sessions': { enabled: false, minimumPlan: 'Pro', reason: 'plan_upgrade_required' },
-        'alerts': { enabled: false, minimumPlan: 'Pro', reason: 'plan_upgrade_required' },
-        'reports': { enabled: false, minimumPlan: 'Pro', reason: 'plan_upgrade_required' },
-        'auto_creds_expiry': { enabled: false, minimumPlan: 'Enterprise', reason: 'plan_upgrade_required' },
-        'ttl_table_access': { enabled: false, minimumPlan: 'Enterprise', reason: 'plan_upgrade_required' }
+        'audit_logs_export': { enabled: false, minimumPlan: 'Planned', reason: 'feature_in_development' },
+        'query_insights': { enabled: false, minimumPlan: 'Planned', reason: 'feature_in_development' },
+        'db_metrics': { enabled: false, minimumPlan: 'Planned', reason: 'feature_in_development' },
+        'sessions': { enabled: false, minimumPlan: 'Planned', reason: 'feature_in_development' },
+        'alerts': { enabled: false, minimumPlan: 'Planned', reason: 'feature_in_development' },
+        'reports': { enabled: false, minimumPlan: 'Planned', reason: 'feature_in_development' },
+        'auto_creds_expiry': { enabled: false, minimumPlan: 'Planned', reason: 'feature_in_development' },
+        'ttl_table_access': { enabled: false, minimumPlan: 'Planned', reason: 'feature_in_development' }
     };
 
     const value = useMemo(() => {
