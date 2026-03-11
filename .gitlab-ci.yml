@@ -28,6 +28,8 @@ publish_community_docker:
   image: docker:latest
   services:
     - docker:dind
+  variables:
+    GIT_DEPTH: 0  # full clone so push to GitHub has all objects
   only:
     - tags
   before_script:
