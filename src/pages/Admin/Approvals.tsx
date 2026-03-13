@@ -1,13 +1,26 @@
 // Copyright (c) 2026 Sai Mouli Bandari Licensed under Business Source License 1.1.
 import React, { useState } from 'react';
-import { Check, X, Shield, Clock, Database, ChevronRight, ChevronDown, User, AlertCircle, Key } from 'lucide-react';
+import { Check, X, Shield, Clock, Database, ChevronRight, ChevronDown, User, AlertCircle, Key, RefreshCw } from 'lucide-react';
 import { useApprovals, useApproveRequest, useRejectRequest, ApprovalRequest } from '../../hooks/useApprovals';
+import { useInstance } from '../../context/InstanceContext';
 import RequestModal from './RequestModal';
 import styles from './Admin.module.css';
 
+/** Items to show for a request: prefer requestedItems, else map requestedPermissions to similar shape. */
+function getDisplayItems(req: ApprovalRequest): Array<{ instanceId?: string; database: string; table: string; privileges: string[] }> {
+    if (req.requestedItems && req.requestedItems.length > 0) {
+        return req.requestedItems;
+    }
+    return (req.requestedPermissions || []).map((p: any) => ({
+        database: p.database,
+        table: p.table,
+        privileges: Array.isArray(p.privileges) ? p.privileges : (p.privileges ? [p.privileges] : [])
+    }));
+}
+
 const Approvals: React.FC = () => {
-    // Hooks
-    const { data: requests = [], isLoading, isError, error } = useApprovals();
+    const { data: requests = [], isLoading, isError, error, refetch } = useApprovals();
+    const { instances } = useInstance();
     const approveMutation = useApproveRequest();
     const rejectMutation = useRejectRequest();
 
@@ -15,18 +28,22 @@ const Approvals: React.FC = () => {
     const [selectedPerms, setSelectedPerms] = useState<Record<string, number[]>>({});
     const [showCreds, setShowCreds] = useState<{ open: boolean, data?: any }>({ open: false });
     const [isRequestModalOpen, setIsRequestModalOpen] = useState(false);
+    const [rejectModal, setRejectModal] = useState<{ id: string; reason: string } | null>(null);
 
     const pendingRequests = requests.filter((r: ApprovalRequest) => r.status === 'pending');
+
+    const resolveInstanceName = (instanceId: string) => {
+        const inst = instances.find((i: { id: string }) => i.id === instanceId);
+        return inst ? (inst as { name: string }).name : instanceId;
+    };
 
     const handleToggleExpand = (id: string, request: ApprovalRequest) => {
         if (expandedId === id) {
             setExpandedId(null);
         } else {
             setExpandedId(id);
-            setSelectedPerms({
-                ...selectedPerms,
-                [id]: request.requestedPermissions?.map((_, i) => i) || []
-            });
+            const items = getDisplayItems(request);
+            setSelectedPerms({ ...selectedPerms, [id]: items.map((_, i) => i) });
         }
     };
 
@@ -40,22 +57,18 @@ const Approvals: React.FC = () => {
     };
 
     const handleApprove = (req: ApprovalRequest) => {
+        const items = getDisplayItems(req);
         const selectedIndices = selectedPerms[req.id] || [];
         if (selectedIndices.length === 0) {
             alert("Please select at least one permission to approve.");
             return;
         }
-
-        // const partial = selectedIndices.length < (req.requestedPermissions?.length || 0); // Unused
-        const finalPerms = req.requestedPermissions?.filter((_: any, i: number) => selectedIndices.includes(i));
-
+        const finalPerms = items.filter((_: any, i: number) => selectedIndices.includes(i));
         approveMutation.mutate({
             id: req.id,
-            status: 'approved', // API might handle partial status internally or we send 'partially_approved'
+            status: 'approved',
             partialPermissions: finalPerms
         });
-
-        // Show mock credentials (in real app, this might come from API response)
         setShowCreds({
             open: true,
             data: {
@@ -68,10 +81,14 @@ const Approvals: React.FC = () => {
         });
     };
 
-    const handleReject = (reqId: string) => {
-        if (confirm("Reject this request?")) {
-            rejectMutation.mutate(reqId);
-        }
+    const handleRejectClick = (reqId: string) => {
+        setRejectModal({ id: reqId, reason: '' });
+    };
+
+    const handleRejectConfirm = () => {
+        if (!rejectModal) return;
+        rejectMutation.mutate({ id: rejectModal.id, rejectionReason: rejectModal.reason.trim() || undefined });
+        setRejectModal(null);
     };
 
     return (
@@ -81,6 +98,10 @@ const Approvals: React.FC = () => {
                     <h1 className={styles.pageTitle}>Pending Approvals</h1>
                     <p className={styles.pageSubtitle}>Review and manage requests for temporary access and role changes.</p>
                 </div>
+                <button className={styles.refreshBtn} onClick={() => refetch()} disabled={isLoading} title="Refresh list">
+                    <RefreshCw size={18} className={isLoading ? 'spin' : ''} />
+                    Refresh
+                </button>
             </div>
 
             {isLoading && <div className={styles.loadingState}>Loading requests...</div>}
@@ -108,7 +129,7 @@ const Approvals: React.FC = () => {
 
                                 <div className={styles.reqMeta}>
                                     <div className={styles.reqBadge}>
-                                        <Database size={14} /> {(req.requestedPermissions || []).length} Objects
+                                        <Database size={14} /> {(getDisplayItems(req)).length} Objects
                                     </div>
                                     {req.type === 'TEMP_USER' && (
                                         <div className={styles.reqBadge} style={{ color: '#ff9800' }}>
@@ -127,7 +148,7 @@ const Approvals: React.FC = () => {
                                             <span>Select partitions to grant access (Partial Approval)</span>
                                         </div>
                                         <div className={styles.permsListDetail}>
-                                            {req.requestedPermissions.map((perm: any, pIdx: number) => (
+                                            {getDisplayItems(req).map((perm: any, pIdx: number) => (
                                                 <div key={pIdx} className={styles.permSelectItem}>
                                                     <input
                                                         type="checkbox"
@@ -135,8 +156,11 @@ const Approvals: React.FC = () => {
                                                         onChange={() => togglePermSelection(req.id, pIdx)}
                                                     />
                                                     <div className={styles.permDisplay}>
+                                                        {perm.instanceId != null && (
+                                                            <span className={styles.permInstance}>{resolveInstanceName(perm.instanceId)}</span>
+                                                        )}
                                                         <code>{perm.database}.{perm.table}</code>
-                                                        <span className={styles.permPrivs}>{perm.privileges.join(', ')}</span>
+                                                        <span className={styles.permPrivs}>{(perm.privileges || []).join(', ')}</span>
                                                     </div>
                                                 </div>
                                             ))}
@@ -144,12 +168,12 @@ const Approvals: React.FC = () => {
                                     </div>
 
                                     <div className={styles.reqActions}>
-                                        <button className={styles.rejectBtn} onClick={() => handleReject(req.id)}>
+                                        <button className={styles.rejectBtn} onClick={() => handleRejectClick(req.id)}>
                                             <X size={16} /> Reject
                                         </button>
                                         <button className={styles.approveBtn} onClick={() => handleApprove(req)}>
                                             <Check size={16} />
-                                            {(selectedPerms[req.id] || []).length < (req.requestedPermissions || []).length ? 'Partial Approve' : 'Approve Request'}
+                                            {(selectedPerms[req.id] || []).length < getDisplayItems(req).length ? 'Partial Approve' : 'Approve Request'}
                                         </button>
                                     </div>
                                 </div>
@@ -195,6 +219,29 @@ const Approvals: React.FC = () => {
                         <button className="btn-primary" onClick={() => setShowCreds({ open: false })} style={{ width: '100%' }}>
                             Done
                         </button>
+                    </div>
+                </div>
+            )}
+            {rejectModal && (
+                <div className={styles.modalOverlay}>
+                    <div className={`${styles.modalContent} card`} style={{ maxWidth: '420px' }}>
+                        <h3>Reject request</h3>
+                        <p style={{ color: 'var(--text-muted)', marginBottom: '12px', fontSize: '14px' }}>
+                            Optionally provide a reason (shown to the requester).
+                        </p>
+                        <textarea
+                            className={styles.rejectReasonInput}
+                            value={rejectModal.reason}
+                            onChange={(e) => setRejectModal({ ...rejectModal, reason: e.target.value })}
+                            placeholder="Rejection reason (optional)"
+                            rows={3}
+                        />
+                        <div className={styles.modalActions} style={{ marginTop: '16px', display: 'flex', gap: '12px', justifyContent: 'flex-end' }}>
+                            <button className={styles.secondaryBtn} onClick={() => setRejectModal(null)}>Cancel</button>
+                            <button className={styles.rejectBtn} onClick={handleRejectConfirm} disabled={rejectMutation.isPending}>
+                                {rejectMutation.isPending ? 'Rejecting…' : 'Reject'}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

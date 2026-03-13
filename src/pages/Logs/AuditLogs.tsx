@@ -8,7 +8,7 @@ import styles from './Logs.module.css';
 
 const AuditLogs: React.FC = () => {
     const { data: logs = [], isLoading, isError, error } = useLogs();
-    const { isFeatureEnabled, getFeature } = useAccess();
+    const { isFeatureEnabled } = useAccess();
     const canExport = isFeatureEnabled('audit_logs_export');
     const [search, setSearch] = useState('');
     const [filterUser, setFilterUser] = useState('');
@@ -19,7 +19,6 @@ const AuditLogs: React.FC = () => {
 
     const handleExport = async () => {
         if (!canExport) {
-            const feature = getFeature('audit_logs_export');
             setExportError(`Export is on our roadmap and not yet available. We’ll notify you when it’s ready.`);
             return;
         }

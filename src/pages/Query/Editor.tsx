@@ -5,7 +5,7 @@ import 'ag-grid-community/styles/ag-grid.css';
 import { AgGridReact } from 'ag-grid-react';
 import React, { useEffect, useMemo, useState } from 'react';
 // import 'ag-grid-community/styles/ag-theme-alpine.css'; // Removed to use legacy theme via prop
-import { AlertTriangle, ChevronLeft, ChevronRight, Clock, Database, FileText, HelpCircle, Maximize2, MessageSquareOff, Minimize2, PanelLeft, PanelRight, Play, Plus, RefreshCw, RotateCcw, Save, Search, Sparkles, Table, X } from 'lucide-react';
+import { AlertTriangle, ChevronLeft, ChevronRight, Clock, Database, FileText, HelpCircle, KeyRound, Maximize2, MessageSquareOff, Minimize2, PanelLeft, PanelRight, Play, Plus, RefreshCw, RotateCcw, Save, Search, Sparkles, Table, X } from 'lucide-react';
 import { useInstance } from '../../context/InstanceContext';
 import { useLayout } from '../../context/LayoutContext';
 import { useExecuteQuery, useQueryTabs, useSavedScripts, useSaveScript, useUpdateTabs } from '../../hooks/useQueryData';
@@ -14,6 +14,7 @@ import { useSchema } from '../../hooks/useSchema';
 import styles from './Query.module.css';
 import { createSqlCompletionProvider } from './SqlAutocomplete';
 import CredentialGateModal from './CredentialGateModal';
+import { RequestAccessForm } from '../../components/RequestAccessForm';
 import { ERR_USER_CREDS_INV, ERR_USER_CREDS_REQ, ERR_FORBIDDEN } from '../../constants/errorCodes';
 import { getApiErrorMessage, getApiErrorCode } from '../../api/errors';
 import { getAIConfig, generateSQL, explainQuery } from '../../api/ai';
@@ -65,6 +66,7 @@ const SQLQueryEditor: React.FC = () => {
     const [explainResult, setExplainResult] = useState<string | null>(null);
     const [explainError, setExplainError] = useState<string | null>(null);
     const [explainPending, setExplainPending] = useState(false);
+    const [showRequestAccessModal, setShowRequestAccessModal] = useState(false);
 
     // Local Tabs State for snappy UI
     const [localTabs, setLocalTabs] = useState<any[]>([]);
@@ -383,6 +385,20 @@ const SQLQueryEditor: React.FC = () => {
                 />
             )}
 
+            {showRequestAccessModal && (
+                <RequestAccessForm
+                    asModal
+                    initialInstanceId={currentInstanceId ?? undefined}
+                    initialDatabase={schemaData?.databases?.[0]?.database ?? ''}
+                    initialTable={schemaData?.databases?.[0]?.tables?.[0]?.name ?? ''}
+                    onClose={() => setShowRequestAccessModal(false)}
+                    onSuccess={() => {
+                        setShowRequestAccessModal(false);
+                        refetchSchema();
+                    }}
+                />
+            )}
+
             {isSaveModalOpen && (
                 <div className={styles.modalOverlay}>
                     <div className={styles.modal}>
@@ -591,6 +607,10 @@ const SQLQueryEditor: React.FC = () => {
                             <button className={styles.toolBtn} onClick={handleExplainClick} disabled={!activeTab?.query?.trim()} title="Explain this query">
                                 <HelpCircle size={16} />
                                 Explain
+                            </button>
+                            <button className={styles.toolBtn} onClick={() => setShowRequestAccessModal(true)} title="Request access to more databases or tables">
+                                <KeyRound size={16} />
+                                Request access
                             </button>
                             <div style={{ flex: 1 }}></div>
                             <button className={styles.toolBtn} onClick={handleSyncTabs} title="Sync tabs with server">

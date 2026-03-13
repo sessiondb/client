@@ -39,8 +39,8 @@ export const AccessProvider: React.FC<{ children: React.ReactNode }> = ({ childr
         ? user.rbacPermissions
         : getDefaultPermissionsForRole(role);
 
-    // Roadmap features (in development) — shown as "Planned" / "Coming soon" per landing-page strategy
-    const currentFeatures = user?.tenantFeatures || {
+    // Roadmap features (in development) — index signature allows string key access without TS7053
+    const currentFeatures: Record<string, { enabled: boolean; minimumPlan?: string; reason?: string }> = user?.tenantFeatures || {
         'audit_logs': { enabled: true },
         'audit_logs_export': { enabled: false, minimumPlan: 'Planned', reason: 'feature_in_development' },
         'query_insights': { enabled: false, minimumPlan: 'Planned', reason: 'feature_in_development' },

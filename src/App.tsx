@@ -11,6 +11,7 @@ import Settings from './pages/Admin/Settings';
 import SettingsAIConfig from './pages/Admin/SettingsAIConfig';
 import AuditLogs from './pages/Logs/AuditLogs';
 import Login from './pages/Login/Login';
+import NoAccess from './pages/NoAccess/NoAccess';
 import { useAuth } from './context/AuthContext';
 import { AccessProvider } from './context/AccessContext';
 import { PermissionGate } from './components/AccessControl/PermissionGate';
@@ -44,6 +45,7 @@ const App: React.FC = () => {
                     <Route path="/login" element={<Login />} />
                     <Route path="/" element={<PrivateRoute><Layout /></PrivateRoute>}>
                         <Route index element={<Navigate to="/query" replace />} />
+                        <Route path="no-access" element={<NoAccess />} />
                         <Route path="query" element={<QueryEditor />} />
                         <Route path="admin" element={
                             <PermissionGate requiredAny={['users:read', 'roles:manage', 'instances:manage', 'approvals:manage']} fallback={<Navigate to="/query" replace />}>

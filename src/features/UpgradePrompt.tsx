@@ -4,8 +4,7 @@ import { Lock } from 'lucide-react';
 import { useAccess } from '../context/AccessContext';
 
 export const UpgradePrompt: React.FC<{ feature: string }> = ({ feature }) => {
-    const { getFeature } = useAccess();
-    const featureData = getFeature(feature);
+    useAccess(); // ensure inside AccessProvider
 
     return (
         <div style={{ padding: '4rem 2rem', textAlign: 'center', background: 'var(--bg-secondary)', borderRadius: '8px', border: '1px dashed var(--border)', margin: '2rem 1rem' }}>
