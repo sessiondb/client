@@ -33,8 +33,8 @@ publish_community_docker:
   only:
     - tags
   before_script:
-    # 1. Install Git, OpenSSH, and GitHub CLI
-    - apk add --no-cache git openssh github-cli
+    # 1. Install Git, OpenSSH, GitHub CLI, and Node (for release artifacts)
+    - apk add --no-cache git openssh github-cli nodejs npm
     - git config --global user.name "GitLab CI Bot"
     - git config --global user.email "ci-bot@sessiondb.com"
     - echo "$DOCKER_HUB_TOKEN" | docker login -u "$DOCKER_HUB_USER" --password-stdin
@@ -51,10 +51,15 @@ publish_community_docker:
     - git push --force https://x-access-token:${GH_TOKEN}@github.com/sessiondb/client.git docker-build-temp:$CI_COMMIT_TAG
     
     # --- STEP 3: CREATE GITHUB RELEASE ---
-    # This creates the 'Release' UI on GitHub with the 'Pre-release' badge
     - export GITHUB_TOKEN=$GH_TOKEN
     - 'gh release create $CI_COMMIT_TAG --repo sessiondb/client --title "SessionDB UI $CI_COMMIT_TAG" --notes "Community Edition. Docker Image: $DOCKER_HUB_USER/sessiondb-ui:$CI_COMMIT_TAG"'
-    # --- STEP 4: DOCKER BUILD & PUSH ---
+    # --- STEP 4: BUILD RELEASE ARTIFACTS (frontend tar.gz + checksum) AND UPLOAD ---
+    - npm ci
+    - npm run build
+    - tar czf sessiondb-frontend-build.tar.gz dist
+    - sha256sum sessiondb-frontend-build.tar.gz > checksums-frontend.txt
+    - gh release upload $CI_COMMIT_TAG sessiondb-frontend-build.tar.gz checksums-frontend.txt --repo sessiondb/client
+    # --- STEP 5: DOCKER BUILD & PUSH ---
     - export IMAGE_TAG=$CI_COMMIT_TAG
     - docker build -t $DOCKER_HUB_USER/sessiondb-ui:$IMAGE_TAG .
     - docker tag $DOCKER_HUB_USER/sessiondb-ui:$IMAGE_TAG $DOCKER_HUB_USER/sessiondb-ui:latest
