@@ -60,9 +60,10 @@ publish_community_docker:
     - tar czf sessiondb-frontend-build.tar.gz dist
     - sha256sum sessiondb-frontend-build.tar.gz > checksums-frontend.txt
     # UI server binary (Go static server with embedded dist): linux/amd64 and linux/arm64
+    # -o is relative to -C dir, so use ../ to write binaries to repo root
     - cp -r dist server/
-    - go build -C server -o sessiondb-ui-linux-amd64 .
-    - GOOS=linux GOARCH=arm64 go build -C server -o sessiondb-ui-linux-arm64 .
+    - go build -C server -o ../sessiondb-ui-linux-amd64 .
+    - GOOS=linux GOARCH=arm64 go build -C server -o ../sessiondb-ui-linux-arm64 .
     - sha256sum sessiondb-ui-linux-amd64 sessiondb-ui-linux-arm64 >> checksums-frontend.txt
     - gh release upload $CI_COMMIT_TAG sessiondb-frontend-build.tar.gz sessiondb-ui-linux-amd64 sessiondb-ui-linux-arm64 checksums-frontend.txt --repo sessiondb/client
     # --- STEP 5: DOCKER BUILD & PUSH ---
