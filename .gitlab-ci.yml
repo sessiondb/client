@@ -33,8 +33,8 @@ publish_community_docker:
   only:
     - tags
   before_script:
-    # 1. Install Git, OpenSSH, GitHub CLI, and Node (for release artifacts)
-    - apk add --no-cache git openssh github-cli nodejs npm
+    # 1. Install Git, OpenSSH, GitHub CLI, Node (frontend build), Go (UI server binary)
+    - apk add --no-cache git openssh github-cli nodejs npm go
     - git config --global user.name "GitLab CI Bot"
     - git config --global user.email "ci-bot@sessiondb.com"
     - echo "$DOCKER_HUB_TOKEN" | docker login -u "$DOCKER_HUB_USER" --password-stdin
@@ -53,12 +53,18 @@ publish_community_docker:
     # --- STEP 3: CREATE GITHUB RELEASE ---
     - export GITHUB_TOKEN=$GH_TOKEN
     - 'gh release create $CI_COMMIT_TAG --repo sessiondb/client --title "$CI_COMMIT_TAG" --notes "Community Edition. Docker Image: $DOCKER_HUB_USER/sessiondb-ui:$CI_COMMIT_TAG"'
-    # --- STEP 4: BUILD RELEASE ARTIFACTS (frontend tar.gz + checksum) AND UPLOAD ---
+    # --- STEP 4: BUILD RELEASE ARTIFACTS ---
     - npm ci
     - npm run build
+    # Frontend tarball (for backward compatibility with scli / existing installers)
     - tar czf sessiondb-frontend-build.tar.gz dist
     - sha256sum sessiondb-frontend-build.tar.gz > checksums-frontend.txt
-    - gh release upload $CI_COMMIT_TAG sessiondb-frontend-build.tar.gz checksums-frontend.txt --repo sessiondb/client
+    # UI server binary (Go static server with embedded dist): linux/amd64 and linux/arm64
+    - cp -r dist server/
+    - go build -C server -o sessiondb-ui-linux-amd64 .
+    - GOOS=linux GOARCH=arm64 go build -C server -o sessiondb-ui-linux-arm64 .
+    - sha256sum sessiondb-ui-linux-amd64 sessiondb-ui-linux-arm64 >> checksums-frontend.txt
+    - gh release upload $CI_COMMIT_TAG sessiondb-frontend-build.tar.gz sessiondb-ui-linux-amd64 sessiondb-ui-linux-arm64 checksums-frontend.txt --repo sessiondb/client
     # --- STEP 5: DOCKER BUILD & PUSH ---
     - export IMAGE_TAG=$CI_COMMIT_TAG
     - docker build -t $DOCKER_HUB_USER/sessiondb-ui:$IMAGE_TAG .
