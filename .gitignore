@@ -34,6 +34,9 @@ dist-ssr
 /dist
 /dist-ssr
 
+# UI server embed (CI copies dist into server/ before go build; do not commit)
+/server/dist
+
 # System files
 .DS_Store
 Thumbs.db
