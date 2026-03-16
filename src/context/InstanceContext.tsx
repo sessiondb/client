@@ -9,6 +9,8 @@ export interface DBInstance {
     host: string;
     port: number;
     type: 'mysql' | 'postgres' | 'mongodb';
+    /** PostgreSQL only: disable | require | verify-ca | verify-full. Empty = disable. */
+    sslMode?: string;
     lastSync?: string;
     status: 'online' | 'offline' | 'syncing';
 }

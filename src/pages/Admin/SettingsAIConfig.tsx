@@ -340,12 +340,12 @@ const SettingsAIConfig: React.FC = () => {
         {isAdmin && adminUsage != null && (
           <>
             <p className={styles.pageSubtitle} style={{ marginTop: '8px' }}>
-              Global (last 30 days): <strong>{adminUsage.global.count}</strong> requests
-              {adminUsage.global.inputTokens + adminUsage.global.outputTokens > 0 && (
-                <> · Input: {adminUsage.global.inputTokens} · Output: {adminUsage.global.outputTokens} tokens</>
+              Global (last 30 days): <strong>{adminUsage.global?.count ?? 0}</strong> requests
+              {((adminUsage.global?.inputTokens ?? 0) + (adminUsage.global?.outputTokens ?? 0)) > 0 && (
+                <> · Input: {adminUsage.global?.inputTokens ?? 0} · Output: {adminUsage.global?.outputTokens ?? 0} tokens</>
               )}
             </p>
-            {adminUsage.byUser.length > 0 && (
+            {(adminUsage.byUser ?? []).length > 0 && (
               <div style={{ marginTop: '12px', overflowX: 'auto' }}>
                 <table style={{ width: '100%', borderCollapse: 'collapse', fontSize: '14px' }}>
                   <thead>
@@ -357,7 +357,7 @@ const SettingsAIConfig: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody>
-                    {adminUsage.byUser.map((row: { UserID: string; Count: number; Input: number; Output: number }) => (
+                    {(adminUsage.byUser ?? []).map((row: { UserID: string; Count: number; Input: number; Output: number }) => (
                       <tr key={row.UserID} style={{ borderBottom: '1px solid var(--border-subtle)' }}>
                         <td style={{ padding: '8px' }}><code>{row.UserID}</code></td>
                         <td style={{ textAlign: 'right', padding: '8px' }}>{row.Count}</td>

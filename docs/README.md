@@ -4,7 +4,27 @@ Welcome to the SessionDB documentation. This directory contains comprehensive te
 
 ## 📚 Documentation Index
 
-### 1. [Backend Requirements Document](./backend-requirements.md)
+### 1. [Installation Guide](./installation.md)
+**Purpose**: Simple guidelines for installing via `scli` (SessionDB CLI).
+- 1-line script installation
+- Go and Manual binary installations
+- First-time setup flow 
+
+### 2. [Tooling (scli)](./tooling.md)
+**Purpose**: Complete CLI command reference and configuration handling.
+- `config.toml` and `.env` source of truth mechanisms
+- Version upgrades and complete environment pruning
+- Deploying Systemd background configurations
+
+### 3. [Services Overview](./services.md)
+**Purpose**: Understanding the sub-components forming the overall application.
+- Architecture stack (Backend logic / Frontend web assets)
+- Managed secrets (`DB_CREDENTIAL_ENCRYPTION_KEY`, `MIGRATE_TOKEN`)
+- Background daemon loops vs on-the-fly development process
+
+---
+
+### 4. [Backend Requirements Document](./backend-requirements.md)
 **Purpose**: Comprehensive backend system requirements and architecture
 
 **Contents**:
@@ -281,20 +301,24 @@ npm install
 npm run dev
 ```
 
-### Backend Setup (To Be Implemented)
+### Backend Setup (via scli)
+The fastest way to install and run the core backend service locally is using the single command initialization CLI tool (`scli`).
+
 ```bash
-# Create backend directory
-mkdir backend && cd backend
+# Download and install the CLI globally
+curl -sSL https://raw.githubusercontent.com/sessiondb/scli/main/install.sh | bash
 
-# Initialize Node.js project
-npm init -y
-npm install express pg redis jsonwebtoken bcrypt
+# Run interactive initialization (Configs stored in config.toml)
+scli init
 
-# OR Initialize Python project
-python -m venv venv
-source venv/bin/activate
-pip install fastapi uvicorn sqlalchemy redis pyjwt bcrypt
+# Install the latest binary release
+scli install
+
+# Start the background server and follow logs
+scli run
 ```
+
+For production setups, deploying background agents, and managing upgrades via CLI, check out the [Installation Guide](./installation.md) and [Tooling (scli) Guide](./tooling.md).
 
 ---
 

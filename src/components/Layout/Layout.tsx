@@ -6,15 +6,19 @@ import Header from './Header';
 import styles from './Layout.module.css';
 import { useLayout } from '../../context/LayoutContext';
 import { useInstance } from '../../context/InstanceContext';
+import { useAccess } from '../../context/AccessContext';
 
 /**
- * Redirects to /no-access when user has no instance access (and not already on no-access).
+ * Redirects to /no-access when user has no instance access and cannot add one.
+ * Users with instances:manage (e.g. superadmin) are not redirected so they can add the first instance from Admin → Instances.
  */
 function NoAccessGuard({ children }: { children: React.ReactNode }) {
     const { instances, isLoading } = useInstance();
+    const { hasPermission } = useAccess();
     const location = useLocation();
     if (location.pathname === '/no-access') return <>{children}</>;
-    if (!isLoading && instances.length === 0) return <Navigate to="/no-access" replace />;
+    const canManageInstances = hasPermission('instances:manage');
+    if (!isLoading && instances.length === 0 && !canManageInstances) return <Navigate to="/no-access" replace />;
     return <>{children}</>;
 }
 

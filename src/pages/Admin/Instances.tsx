@@ -147,9 +147,27 @@ const InstanceManagement: React.FC = () => {
                     instance={editingInstance}
                     onSave={(data) => {
                         if (editingInstance) {
-                            updateMutation.mutate({ ...data, id: editingInstance.id });
+                            const updatePayload: Record<string, unknown> = {
+                                name: data.name,
+                                host: data.host,
+                                port: data.port,
+                                type: data.type,
+                                username: data.username,
+                                id: editingInstance.id,
+                            };
+                            if (data.type === 'postgres' || data.type === 'mysql') updatePayload.sslMode = data.sslMode ?? '';
+                            if (data.password) updatePayload.password = data.password;
+                            updateMutation.mutate(updatePayload as Partial<DBInstance> & { id: string });
                         } else {
-                            createMutation.mutate(data);
+                            createMutation.mutate({
+                                name: data.name,
+                                host: data.host,
+                                port: data.port,
+                                type: data.type,
+                                username: data.username,
+                                password: data.password,
+                                ...((data.type === 'postgres' || data.type === 'mysql') && data.sslMode ? { sslMode: data.sslMode } : {}),
+                            });
                         }
                         setIsModalOpen(false);
                     }}
@@ -166,14 +184,22 @@ interface InstanceModalProps {
     onSave: (data: any) => void;
 }
 
+const SSL_MODE_OPTIONS = [
+    { value: '', label: 'Disable (default)' },
+    { value: 'require', label: 'Require' },
+    { value: 'verify-ca', label: 'Verify CA' },
+    { value: 'verify-full', label: 'Verify Full' },
+] as const;
+
 const InstanceModal: React.FC<InstanceModalProps> = ({ onClose, instance, onSave }) => {
     const [formData, setFormData] = useState({
         name: instance?.name || '',
         host: instance?.host || '',
-        port: instance?.port || 3306,
-        type: instance?.type || 'mysql',
-        username: '',
-        password: ''
+        port: instance?.port ?? 3306,
+        type: (instance?.type || 'mysql') as 'mysql' | 'postgres' | 'mongodb',
+        username: (instance as any)?.username ?? '',
+        password: '',
+        sslMode: instance?.sslMode ?? '',
     });
 
     return (
@@ -208,7 +234,7 @@ const InstanceModal: React.FC<InstanceModalProps> = ({ onClose, instance, onSave
                                 type="number"
                                 className={styles.formInput}
                                 value={formData.port}
-                                onChange={e => setFormData({ ...formData, port: parseInt(e.target.value) })}
+                                onChange={e => setFormData({ ...formData, port: Number.parseInt(e.target.value, 10) || 0 })}
                             />
                         </div>
                     </div>
@@ -217,13 +243,28 @@ const InstanceModal: React.FC<InstanceModalProps> = ({ onClose, instance, onSave
                         <select
                             className={styles.formInput}
                             value={formData.type}
-                            onChange={e => setFormData({ ...formData, type: e.target.value as any })}
+                            onChange={e => setFormData({ ...formData, type: e.target.value as 'mysql' | 'postgres' | 'mongodb' })}
                         >
                             <option value="mysql">MySQL</option>
                             <option value="postgres">PostgreSQL</option>
                             <option value="mongodb">MongoDB</option>
                         </select>
                     </div>
+                    {(formData.type === 'postgres' || formData.type === 'mysql') && (
+                        <div className={styles.formGroup}>
+                            <label>SSL Mode</label>
+                            <select
+                                className={styles.formInput}
+                                value={formData.sslMode}
+                                onChange={e => setFormData({ ...formData, sslMode: e.target.value })}
+                                title="Use &quot;Require&quot; when the server requires SSL (e.g. cloud Postgres/MySQL)"
+                            >
+                                {SSL_MODE_OPTIONS.map((opt) => (
+                                    <option key={opt.value || 'disable'} value={opt.value}>{opt.label}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
                     <div className={styles.formRow}>
                         <div className={styles.formGroup}>
                             <label>Username</label>
