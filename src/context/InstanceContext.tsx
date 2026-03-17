@@ -13,6 +13,10 @@ export interface DBInstance {
     sslMode?: string;
     lastSync?: string;
     status: 'online' | 'offline' | 'syncing';
+    /** Connection username; used only in create/update payloads, not returned by API. */
+    username?: string;
+    /** Connection password; used only in create/update payloads, not returned by API. */
+    password?: string;
 }
 
 interface InstanceContextType {
