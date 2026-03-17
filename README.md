@@ -69,6 +69,12 @@ SessionDB's frontend is completely decoupled from subscription logic using a sca
 
 ---
 
+## Contributing
+
+We welcome contributions! Please see [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines, [CODE_OF_CONDUCT.md](CODE_OF_CONDUCT.md) for our community standards, and [SECURITY.md](SECURITY.md) for how to report security issues.
+
+---
+
 ## ⚖️ License
 
 This project is licensed under the **Business Source License 1.1**. 
