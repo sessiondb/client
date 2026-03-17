@@ -166,7 +166,7 @@ const InstanceManagement: React.FC = () => {
                                 type: data.type,
                                 username: data.username,
                                 password: data.password,
-                                ...((data.type === 'postgres' || data.type === 'mysql') && data.sslMode ? { sslMode: data.sslMode } : {}),
+                                ...(data.type === 'postgres' || data.type === 'mysql' ? { sslMode: data.sslMode ?? '' } : {}),
                             });
                         }
                         setIsModalOpen(false);
@@ -250,21 +250,20 @@ const InstanceModal: React.FC<InstanceModalProps> = ({ onClose, instance, onSave
                             <option value="mongodb">MongoDB</option>
                         </select>
                     </div>
-                    {(formData.type === 'postgres' || formData.type === 'mysql') && (
-                        <div className={styles.formGroup}>
-                            <label>SSL Mode</label>
-                            <select
-                                className={styles.formInput}
-                                value={formData.sslMode}
-                                onChange={e => setFormData({ ...formData, sslMode: e.target.value })}
-                                title="Use &quot;Require&quot; when the server requires SSL (e.g. cloud Postgres/MySQL)"
-                            >
-                                {SSL_MODE_OPTIONS.map((opt) => (
-                                    <option key={opt.value || 'disable'} value={opt.value}>{opt.label}</option>
-                                ))}
-                            </select>
-                        </div>
-                    )}
+                    <div className={styles.formGroup}>
+                        <label>SSL Mode {(formData.type === 'postgres' || formData.type === 'mysql') ? '' : '(PostgreSQL/MySQL only)'}</label>
+                        <select
+                            className={styles.formInput}
+                            value={formData.sslMode}
+                            onChange={e => setFormData({ ...formData, sslMode: e.target.value })}
+                            title="Use &quot;Require&quot; when the server requires SSL (e.g. cloud Postgres/MySQL)"
+                            disabled={formData.type === 'mongodb'}
+                        >
+                            {SSL_MODE_OPTIONS.map((opt) => (
+                                <option key={opt.value || 'disable'} value={opt.value}>{opt.label}</option>
+                            ))}
+                        </select>
+                    </div>
                     <div className={styles.formRow}>
                         <div className={styles.formGroup}>
                             <label>Username</label>
