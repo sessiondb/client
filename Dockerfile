@@ -25,11 +25,13 @@ COPY --from=builder /app/dist /usr/share/nginx/html
 RUN rm /etc/nginx/conf.d/default.conf
 COPY nginx.conf /etc/nginx/conf.d/default.conf
 
-# Copy the environment variable script
+# Copy the environment variable script (injects API_URL into env-config.js at runtime)
 COPY env.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 
 EXPOSE 80
 
+# Pass API_URL at run time so the UI can reach the backend, e.g.:
+#   docker run -e API_URL=http://localhost:8080/v1 -p 80:80 <image>
 CMD ["/docker-entrypoint.sh"]
 
